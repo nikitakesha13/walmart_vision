@@ -1,3 +1,6 @@
-install pip
+1. install python on your Windows computer
 
-pip3 install -r requirements.txt
+2. pip install -r requirements.txt
+ 
+If you need to upgrade any package, use command:
+pip install --upgrade <corrupted package>
