@@ -1,6 +1,4 @@
 import cv2
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,

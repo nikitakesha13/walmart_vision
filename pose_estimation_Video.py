@@ -1,6 +1,4 @@
 import cv2
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
@@ -14,88 +12,81 @@ POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElb
                ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
                ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"] ]
 
-
-width = 368
-height = 368
-inWidth = width
-inHeight = height
-
 net = cv2.dnn.readNetFromTensorflow("graph_opt.pb")
 
 thres = 0.2
 
 cap = cv2.VideoCapture("test-video/run1.mp4")
 
-def pose_estimation(cap):
+# To capture video right now, comment above and use below
+# cap = cv2.VideoCapture(0)
+
+if (cap.isOpened() == False):
+    print("Error opening file")
+
+frameWidth = int(cap.get(3))
+frameHeight = int(cap.get(4))
+
+size = (frameWidth, frameHeight)
+
+result = cv2.VideoWriter("test-video-out/out.mp4", cv2.VideoWriter_fourcc('m', 'p', '4', 'v'), 10, size)
+
+def pose_estimation():
     
-    
-    
-    while(cap.isOpened()):
+    while(True):
         
         ret, frame = cap.read()
-        frame = cv2.resize(frame,(0,0),fx = 0.5,fy = 0.5)
-        
-        frameWidth = frame.shape[1]
-        frameHeight = frame.shape[0]
-    
-        net.setInput(cv2.dnn.blobFromImage(frame, 2.0, (inWidth, inHeight), (127.5, 127.5, 127.5), swapRB=True, crop=False))
-    
-        out = net.forward()
-        out = out[:, :19, :, :]
-    
-        assert(len(BODY_PARTS) == out.shape[1])
-    
-        points = []
-        
-        
-        for i in range(len(BODY_PARTS)):
-            # Slice heatmap of corresponging body's part.
-            heatMap = out[0, i, :, :]
 
-            _, conf, _, point = cv2.minMaxLoc(heatMap)
-            x = (frameWidth * point[0]) / out.shape[3]
-            y = (frameHeight * point[1]) / out.shape[2]
-            points.append((int(x), int(y)) if conf > thres else None)
+        if ret == True:
+        
+            net.setInput(cv2.dnn.blobFromImage(frame, 2.0, (368, 368), (127.5, 127.5, 127.5), swapRB=True, crop=False))
+        
+            out = net.forward()
+            out = out[:, :19, :, :]
+        
+            assert(len(BODY_PARTS) == out.shape[1])
+        
+            points = []
             
-        for pair in POSE_PAIRS:
-            partFrom = pair[0]
-            partTo = pair[1]
-            assert(partFrom in BODY_PARTS)
-            assert(partTo in BODY_PARTS)
+            
+            for i in range(len(BODY_PARTS)):
+                # Slice heatmap of corresponging body's part.
+                heatMap = out[0, i, :, :]
 
-            idFrom = BODY_PARTS[partFrom]
-            idTo = BODY_PARTS[partTo]
-            
-            if points[idFrom] and points[idTo]:
-                cv2.line(frame, points[idFrom], points[idTo], (0, 255, 0), 3)
-                cv2.ellipse(frame, points[idFrom], (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
-                cv2.ellipse(frame, points[idTo], (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
+                _, conf, _, point = cv2.minMaxLoc(heatMap)
+                x = (frameWidth * point[0]) / out.shape[3]
+                y = (frameHeight * point[1]) / out.shape[2]
+                points.append((int(x), int(y)) if conf > thres else None)
                 
-        t, _ = net.getPerfProfile()
-        img = frame
-        
-        
-        size = (frameWidth, frameHeight) 
-        
-        cv2.imshow('pose',frame)
-        
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+            for pair in POSE_PAIRS:
+                partFrom = pair[0]
+                partTo = pair[1]
+                assert(partFrom in BODY_PARTS)
+                assert(partTo in BODY_PARTS)
+
+                idFrom = BODY_PARTS[partFrom]
+                idTo = BODY_PARTS[partTo]
+                
+                if points[idFrom] and points[idTo]:
+                    cv2.line(frame, points[idFrom], points[idTo], (0, 255, 0), 3)
+                    cv2.ellipse(frame, points[idFrom], (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
+                    cv2.ellipse(frame, points[idTo], (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
+                    cv2.putText(frame, str(partTo), points[idTo], cv2.FONT_HERSHEY_PLAIN, 1.0, (0,0,255), 2)
+            
+            result.write(frame)
+
+            cv2.imshow('pose', frame)
+            
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+        else :
             break
-    cap.release()
-
-    cv2.destroyAllWindows()
     
         
     
-
-output = pose_estimation(cap = cap)
-
+pose_estimation()
 
 cap.release()
+result.release()
 
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-    
-    
-            
+cv2.destroyAllWindows()            
