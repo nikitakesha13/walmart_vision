@@ -19,14 +19,16 @@ POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElb
 
 # net = cv2.dnn.readNetFromTensorflow("graph_opt.pb")
 net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
+net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
 
 # Use when graph_out.pb
-# thres = 0.3
+# thres = 0.45
 
 # Use when coco
 thres = 0.1
 
-# cap = cv2.VideoCapture("test-video/run1.mp4")
+# cap = cv2.VideoCapture("test-video/DeadliftCrop.mp4")
 
 # To capture video right now, comment above and use below
 cap = cv2.VideoCapture(0)
@@ -50,8 +52,7 @@ def pose_estimation():
         if ret == True:
         
             # net.setInput(cv2.dnn.blobFromImage(frame, 1.0, (368, 368), (127.5, 127.5, 127.5), swapRB=True, crop=False))
-            net.setInput(cv2.dnn.blobFromImage(frame, 1.0 / 255, (368, 368),
-                              (0, 0, 0), swapRB=False, crop=False))
+            net.setInput(cv2.dnn.blobFromImage(frame, 1.0 / 255, (368, 368), (0, 0, 0), swapRB=False, crop=False))
         
             out = net.forward()
             out = out[:, :19, :, :]
