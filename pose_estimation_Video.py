@@ -1,5 +1,10 @@
 import cv2
 
+# select if its front or side 
+
+protoFile = "pose/coco/pose_deploy_linevec.prototxt"
+weightsFile = "pose/coco/pose_iter_440000.caffemodel"
+
 
 BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
                "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
@@ -12,14 +17,19 @@ POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElb
                ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
                ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"] ]
 
-net = cv2.dnn.readNetFromTensorflow("graph_opt.pb")
+# net = cv2.dnn.readNetFromTensorflow("graph_opt.pb")
+net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
 
-thres = 0.2
+# Use when graph_out.pb
+# thres = 0.3
 
-cap = cv2.VideoCapture("test-video/run1.mp4")
+# Use when coco
+thres = 0.1
+
+# cap = cv2.VideoCapture("test-video/run1.mp4")
 
 # To capture video right now, comment above and use below
-# cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0)
 
 if (cap.isOpened() == False):
     print("Error opening file")
@@ -39,7 +49,9 @@ def pose_estimation():
 
         if ret == True:
         
-            net.setInput(cv2.dnn.blobFromImage(frame, 2.0, (368, 368), (127.5, 127.5, 127.5), swapRB=True, crop=False))
+            # net.setInput(cv2.dnn.blobFromImage(frame, 1.0, (368, 368), (127.5, 127.5, 127.5), swapRB=True, crop=False))
+            net.setInput(cv2.dnn.blobFromImage(frame, 1.0 / 255, (368, 368),
+                              (0, 0, 0), swapRB=False, crop=False))
         
             out = net.forward()
             out = out[:, :19, :, :]
