@@ -1,105 +1,126 @@
 import cv2
+import time
+import parser
 
 # select if its front or side 
+class Skeleton:
+    def __init__(self, source, device = "cpu", thres = 0.1):
+        self.source = source
+        self.device = device
+        self.thres = thres
 
-protoFile = "pose/coco/pose_deploy_linevec.prototxt"
-weightsFile = "pose/coco/pose_iter_440000.caffemodel"
+        self.BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
+                    "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
+                    "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "REye": 14,
+                    "LEye": 15, "REar": 16, "LEar": 17, "Background": 18 }
 
+        self.POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
+                    ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
+                    ["Neck", "RHip"], ["RHip", "RKnee"], ["RKnee", "RAnkle"], ["Neck", "LHip"],
+                    ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
+                    ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"] ]
 
-BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
-               "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
-               "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "REye": 14,
-               "LEye": 15, "REar": 16, "LEar": 17, "Background": 18 }
+        protoFile = "pose/coco/pose_deploy_linevec.prototxt"
+        weightsFile = "pose/coco/pose_iter_440000.caffemodel"
+        self.net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
 
-POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
-               ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
-               ["Neck", "RHip"], ["RHip", "RKnee"], ["RKnee", "RAnkle"], ["Neck", "LHip"],
-               ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
-               ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"] ]
+        if (device == "gpu"):
+            self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
+            self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+        
+        self.cap = cv2.VideoCapture(source)
 
-# net = cv2.dnn.readNetFromTensorflow("graph_opt.pb")
-net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
-net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
-net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
+        if (self.cap.isOpened() == False):
+            print("Error opening file")
 
-# Use when graph_out.pb
-# thres = 0.45
+        self.frameWidth = int(self.cap.get(3))
+        self.frameHeight = int(self.cap.get(4))
 
-# Use when coco
-thres = 0.1
+        size = (self.frameWidth, self.frameHeight)
 
-# cap = cv2.VideoCapture("test-video/DeadliftCrop.mp4")
-
-# To capture video right now, comment above and use below
-cap = cv2.VideoCapture(0)
-
-if (cap.isOpened() == False):
-    print("Error opening file")
-
-frameWidth = int(cap.get(3))
-frameHeight = int(cap.get(4))
-
-size = (frameWidth, frameHeight)
-
-result = cv2.VideoWriter("test-video-out/out.mp4", cv2.VideoWriter_fourcc('m', 'p', '4', 'v'), 10, size)
-
-def pose_estimation():
+        self.result = cv2.VideoWriter("test-video-out/out.mp4", cv2.VideoWriter_fourcc('m', 'p', '4', 'v'), 30, size)
     
-    while(True):
-        
-        ret, frame = cap.read()
+    def pose_estimation(self):
 
-        if ret == True:
+        frame_count = 0
+        total_fps = 0
         
-            # net.setInput(cv2.dnn.blobFromImage(frame, 1.0, (368, 368), (127.5, 127.5, 127.5), swapRB=True, crop=False))
-            net.setInput(cv2.dnn.blobFromImage(frame, 1.0 / 255, (368, 368), (0, 0, 0), swapRB=False, crop=False))
-        
-            out = net.forward()
-            out = out[:, :19, :, :]
-        
-            assert(len(BODY_PARTS) == out.shape[1])
-        
-            points = []
-            
-            
-            for i in range(len(BODY_PARTS)):
-                # Slice heatmap of corresponging body's part.
-                heatMap = out[0, i, :, :]
+        while(True):
 
-                _, conf, _, point = cv2.minMaxLoc(heatMap)
-                x = (frameWidth * point[0]) / out.shape[3]
-                y = (frameHeight * point[1]) / out.shape[2]
-                points.append((int(x), int(y)) if conf > thres else None)
+            print("Frame {} Processing".format(frame_count))
+            
+            ret, frame = self.cap.read()
+
+            if ret == True:
+
+                start_time = time.time()
+            
+                self.net.setInput(cv2.dnn.blobFromImage(frame, 1.0 / 255, (368, 368), (0, 0, 0), swapRB=False, crop=False))
+            
+                out = self.net.forward()
+                out = out[:, :19, :, :]
+            
+                assert(len(self.BODY_PARTS) == out.shape[1])
+            
+                points = []
+
+                for i in range(len(self.BODY_PARTS)):
+                    # Slice heatmap of corresponging body's part.
+                    heatMap = out[0, i, :, :]
+
+                    _, conf, _, point = cv2.minMaxLoc(heatMap)
+                    x = (self.frameWidth * point[0]) / out.shape[3]
+                    y = (self.frameHeight * point[1]) / out.shape[2]
+                    points.append((int(x), int(y)) if conf > self.thres else None)
+                    
+                for pair in self.POSE_PAIRS:
+                    partFrom = pair[0]
+                    partTo = pair[1]
+                    assert(partFrom in self.BODY_PARTS)
+                    assert(partTo in self.BODY_PARTS)
+
+                    idFrom = self.BODY_PARTS[partFrom]
+                    idTo = self.BODY_PARTS[partTo]
+                    
+                    if points[idFrom] and points[idTo]:
+                        cv2.line(frame, points[idFrom], points[idTo], (0, 255, 0), 3)
+                        cv2.ellipse(frame, points[idFrom], (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
+                        cv2.ellipse(frame, points[idTo], (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
+                        cv2.putText(frame, str(partTo), points[idTo], cv2.FONT_HERSHEY_PLAIN, 1.0, (0,0,255), 2)
+
+                end_time = time.time()
+                fps = 1 / (end_time - start_time)
+                total_fps += fps
+                frame_count += 1
+
+                cv2.imshow('pose', frame)
+
+                self.result.write(frame)
                 
-            for pair in POSE_PAIRS:
-                partFrom = pair[0]
-                partTo = pair[1]
-                assert(partFrom in BODY_PARTS)
-                assert(partTo in BODY_PARTS)
-
-                idFrom = BODY_PARTS[partFrom]
-                idTo = BODY_PARTS[partTo]
-                
-                if points[idFrom] and points[idTo]:
-                    cv2.line(frame, points[idFrom], points[idTo], (0, 255, 0), 3)
-                    cv2.ellipse(frame, points[idFrom], (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
-                    cv2.ellipse(frame, points[idTo], (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
-                    cv2.putText(frame, str(partTo), points[idTo], cv2.FONT_HERSHEY_PLAIN, 1.0, (0,0,255), 2)
-            
-            result.write(frame)
-
-            cv2.imshow('pose', frame)
-            
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
-        else :
-            break
-    
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    avg_fps = total_fps / frame_count
+                    return avg_fps
+            else :
+                avg_fps = total_fps / frame_count
+                return avg_fps
         
+    def release(self):
+        self.cap.release()
+        self.result.release()
+        cv2.destroyAllWindows() 
+
+
+def main():
+    args = parser.parse_args()
+    if args.source == '0':
+        args.source = 0
+
+    skeleton = Skeleton(args.source, "cpu")
+    avg_fps = skeleton.pose_estimation()
+    skeleton.release()
+
+    print(f"Average FPS: {avg_fps:.3f}")
     
-pose_estimation()
 
-cap.release()
-result.release()
-
-cv2.destroyAllWindows()            
+if __name__ == '__main__':
+    main()
