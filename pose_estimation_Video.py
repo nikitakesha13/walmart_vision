@@ -1,28 +1,48 @@
 import cv2
 import time
+
+from traitlets import default
 import parser
 
 # select if its front or side 
 class Skeleton:
-    def __init__(self, source, device = "cpu", thres = 0.1):
+    def __init__(self, source, device = "cpu", model = "COCO", thres = 0.1):
         self.source = source
         self.device = device
         self.thres = thres
 
-        self.BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
-                    "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
-                    "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "REye": 14,
-                    "LEye": 15, "REar": 16, "LEar": 17, "Background": 18 }
+        match model:
+            case "MPI": # requires higher threshold
+                print("Using MPI model")
+                self.BODY_PARTS = { "Head": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
+                            "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
+                            "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "Chest": 14, "Background": 15 }
 
-        self.POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
-                    ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
-                    ["Neck", "RHip"], ["RHip", "RKnee"], ["RKnee", "RAnkle"], ["Neck", "LHip"],
-                    ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
-                    ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"] ]
+                self.POSE_PAIRS = [ ["Head", "Neck"], ["Neck", "RShoulder"], ["RShoulder", "RElbow"],
+                                    ["RElbow", "RWrist"], ["Neck", "LShoulder"], ["LShoulder", "LElbow"],
+                                    ["LElbow", "LWrist"], ["Neck", "Chest"], ["Chest", "RHip"], ["RHip", "RKnee"],
+                                    ["RKnee", "RAnkle"], ["Chest", "LHip"], ["LHip", "LKnee"], ["LKnee", "LAnkle"] ]
 
-        protoFile = "pose/coco/pose_deploy_linevec.prototxt"
-        weightsFile = "pose/coco/pose_iter_440000.caffemodel"
-        self.net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
+                protoFile_mpi = "pose/mpi/pose_deploy_linevec_faster_4_stages.prototxt"
+                weightsFile_mpi = "pose/mpi/pose_iter_160000.caffemodel"
+                self.net = cv2.dnn.readNetFromCaffe(protoFile_mpi, weightsFile_mpi)
+
+            case default: # COCO is default model
+                print("Using COCO model")
+                self.BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
+                            "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
+                            "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "REye": 14,
+                            "LEye": 15, "REar": 16, "LEar": 17, "Background": 18 }
+
+                self.POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
+                            ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
+                            ["Neck", "RHip"], ["RHip", "RKnee"], ["RKnee", "RAnkle"], ["Neck", "LHip"],
+                            ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
+                            ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"] ]
+
+                protoFile_coco = "pose/coco/pose_deploy_linevec.prototxt"
+                weightsFile_coco = "pose/coco/pose_iter_440000.caffemodel"
+                self.net = cv2.dnn.readNetFromCaffe(protoFile_coco, weightsFile_coco)
 
         if (device == "gpu"):
             self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
@@ -56,12 +76,7 @@ class Skeleton:
             if ret == True:
             
                 self.net.setInput(cv2.dnn.blobFromImage(frame, 1.0 / 255, (368, 368), (0, 0, 0), swapRB=False, crop=False))
-            
                 out = self.net.forward()
-                out = out[:, :19, :, :]
-            
-                assert(len(self.BODY_PARTS) == out.shape[1])
-            
                 points = []
 
                 for i in range(len(self.BODY_PARTS)):
@@ -93,7 +108,7 @@ class Skeleton:
                 total_fps += fps
                 frame_count += 1
 
-                # cv2.imshow('pose', frame)
+                cv2.imshow('pose', frame)
 
                 self.result.write(frame)
 
@@ -117,7 +132,7 @@ def main():
     if args.source == '0':
         args.source = 0
 
-    skeleton = Skeleton(args.source, args.device)
+    skeleton = Skeleton(args.source, args.device, args.model, args.thres)
     avg_fps = skeleton.pose_estimation()
     skeleton.release()
 

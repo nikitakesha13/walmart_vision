@@ -1,0 +1,16 @@
+BODY_25 is the fastest one on the GPU, the most accurate one, and the one with the highest number of keypoints (including foot keypoints!), highly recommended. It also uses the most amount of RAM/GPU memory.
+COCO is faster than BODY_25 on the CPU but slower on the GPU and less accurate.
+MPI is the fastest on the CPU but the least accurate of all 3.
+
+
+COCO Model:
+
+    With Queue on CPU: 0.631 FPS
+    With Queue on GPU: 3.95 FPS
+
+    WithOut Queue on CPU: 1.084 FPS
+    WithOut Queue on GPU: 6.105 FPS
+
+MPI Model:
+    WithOut Queue on CPU: 1.672 FPS
+    WithOut Queue on GPU: 9.245 FPS
