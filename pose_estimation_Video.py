@@ -48,12 +48,12 @@ class Skeleton:
         while(True):
 
             print("Frame {} Processing".format(frame_count))
+
+            start_time = time.time()
             
             ret, frame = self.cap.read()
 
             if ret == True:
-
-                start_time = time.time()
             
                 self.net.setInput(cv2.dnn.blobFromImage(frame, 1.0 / 255, (368, 368), (0, 0, 0), swapRB=False, crop=False))
             
@@ -93,9 +93,11 @@ class Skeleton:
                 total_fps += fps
                 frame_count += 1
 
-                cv2.imshow('pose', frame)
+                # cv2.imshow('pose', frame)
 
                 self.result.write(frame)
+
+                print("Time to process frame in sec: " + str(end_time - start_time))
                 
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     avg_fps = total_fps / frame_count
@@ -115,7 +117,7 @@ def main():
     if args.source == '0':
         args.source = 0
 
-    skeleton = Skeleton(args.source, "cpu")
+    skeleton = Skeleton(args.source, args.device)
     avg_fps = skeleton.pose_estimation()
     skeleton.release()
 
