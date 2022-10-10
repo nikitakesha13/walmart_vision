@@ -2,6 +2,7 @@ BODY_25 is the fastest one on the GPU, the most accurate one, and the one with t
 COCO is faster than BODY_25 on the CPU but slower on the GPU and less accurate.
 MPI is the fastest on the CPU but the least accurate of all 3.
 
+GPU model: NVIDIA GeForce GTX 1650 Ti
 
 COCO Model:
 
@@ -14,3 +15,7 @@ COCO Model:
 MPI Model:
     WithOut Queue on CPU: 1.672 FPS
     WithOut Queue on GPU: 9.245 FPS
+
+Body_25 Model:
+    Without Queue on CPU: 1.593 FPS
+    Without Queue on GPU: 16.377 FPS
