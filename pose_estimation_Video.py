@@ -4,7 +4,7 @@ import parser
 
 # select if its front or side 
 class Skeleton:
-    def __init__(self, source, device = "cpu", model = "COCO", thres = 0.1):
+    def __init__(self, source, device, model, thres):
         self.source = source
         self.device = device
         self.thres = thres
@@ -73,9 +73,12 @@ class Skeleton:
         self.frameWidth = int(self.cap.get(3))
         self.frameHeight = int(self.cap.get(4))
 
+        print("Width: " + str(self.frameWidth))
+        print("Length: " + str(self.frameHeight))
+
         size = (self.frameWidth, self.frameHeight)
 
-        self.result = cv2.VideoWriter("test-video-out/out.mp4", cv2.VideoWriter_fourcc('m', 'p', '4', 'v'), 30, size)
+        self.result = cv2.VideoWriter("test-video-out/out.avi", cv2.VideoWriter_fourcc('M','J','P','G'), 30, size)
     
     def pose_estimation(self):
 
@@ -125,9 +128,9 @@ class Skeleton:
                 total_fps += fps
                 frame_count += 1
 
-                # cv2.imshow('pose', frame)
-
                 self.result.write(frame)
+
+                cv2.imshow('pose', frame)
 
                 print("Time to process frame in sec: " + str(end_time - start_time))
                 
@@ -149,7 +152,7 @@ def main():
     if args.source == '0':
         args.source = 0
 
-    skeleton = Skeleton(args.source, args.device, args.model)
+    skeleton = Skeleton(args.source, args.device, args.model, args.thres)
     avg_fps = skeleton.pose_estimation()
     skeleton.release()
 
