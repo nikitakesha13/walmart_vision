@@ -58,3 +58,22 @@ def get_frames(file):
         frames.append(frame)
     
     return frames
+
+def get_measurements(frame):
+    measurements = {
+        "RKnee Angle" : law_cosines(frame["Rankle"], frame["Rknee"], frame["Rhip"]),
+        "LKnee Angle" : law_cosines(frame["Lankle"], frame["Lknee"], frame["Lhip"]),
+        "RPelvic Angle" : law_cosines(frame["Rknee"], frame["Rhip"], frame["Rshoulder"]),
+        "LPelvic Angle" : law_cosines(frame["Lknee"], frame["Lhip"], frame["Lshoulder"]),
+        "RElbow Angle" : law_cosines(frame["Rshoulder"], frame["Relbow"], frame["Rwrist"]),
+        "LElbow Angle" : law_cosines(frame["Lshoulder"], frame["Lelbow"], frame["Lwrist"]),
+        "RArmPit Angle" : law_cosines(frame["Rhip"], frame["Rshoulder"], frame["Rwrist"]),
+        "LArmPit Angle" : law_cosines(frame["Lhip"], frame["Lshoulder"], frame["Lwrist"]),
+        "Spinal Length" : -1
+    }
+
+    tailbone = ((frame["Lhip"][0] + frame["Rhip"][0]) / 2, (frame["Lhip"][1] + frame["Rhip"][1]) / 2)
+    measurements["Spinal Length"] = distance(tailbone, frame["neck"])
+
+    return measurements
+
