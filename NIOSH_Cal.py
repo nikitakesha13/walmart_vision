@@ -20,6 +20,8 @@ def HMFactor(horizontialDist):
         return 0.50
     elif(horizontialDist > (50 * 2.54 ) and horizontialDist <= (60 * 2.54 )):
         return 0.42
+    else:
+        return 0
 
 #run the vertical distance to get the VM factor
 def VMFactor(verticalDist):
