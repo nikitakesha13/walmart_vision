@@ -2,28 +2,43 @@ import cv2
 import time
 import parser
 
+
 # select if its front or side 
 class Skeleton:
     def __init__(self, source, device, model, thres):
         self.source = source
         self.device = device
         self.thres = thres
+        self.file = open("points.txt", "w")
 
         if model == "BODY_25":
             print("Using BODY_25 model")
+
             self.BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
-                        "LShoulder": 5, "LElbow": 6, "LWrist": 7, "MidHip": 8, "RHip": 9, "RKnee": 10,
+                        "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 9, "RKnee": 10,
                         "RAnkle": 11, "LHip": 12, "LKnee": 13, "LAnkle": 14, "REye": 15,
-                        "LEye": 16, "REar": 17, "LEar": 18, "LBigToe": 19, "LSmallToe": 20, "LHeel": 21, 
-                        "RBigToe": 22, "RSmallToe": 23, "RHeel": 24, "Background": 25 }
+                        "LEye": 16, "REar": 17, "LEar": 18, "Background": 25 }
 
             self.POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
                         ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
                         ["Neck", "RHip"], ["RHip", "RKnee"], ["RKnee", "RAnkle"], ["Neck", "LHip"],
                         ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
-                        ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"], ["LAnkle", "LBigToe"],
-                        ["LAnkle", "LSmallToe"], ["LAnkle", "LHeel"], ["RAnkle", "RBigToe"], ["RAnkle", "RSmallToe"],
-                        ["RAnkle", "RHeel"] ]
+                        ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"] ]
+
+            # The original BODY_25 points
+            # self.BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
+            #             "LShoulder": 5, "LElbow": 6, "LWrist": 7, "MidHip": 8, "RHip": 9, "RKnee": 10,
+            #             "RAnkle": 11, "LHip": 12, "LKnee": 13, "LAnkle": 14, "REye": 15,
+            #             "LEye": 16, "REar": 17, "LEar": 18, "LBigToe": 19, "LSmallToe": 20, "LHeel": 21, 
+            #             "RBigToe": 22, "RSmallToe": 23, "RHeel": 24, "Background": 25 }
+
+            # self.POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
+            #             ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
+            #             ["Neck", "RHip"], ["RHip", "RKnee"], ["RKnee", "RAnkle"], ["Neck", "LHip"],
+            #             ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
+            #             ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"], ["LAnkle", "LBigToe"],
+            #             ["LAnkle", "LSmallToe"], ["LAnkle", "LHeel"], ["RAnkle", "RBigToe"], ["RAnkle", "RSmallToe"],
+            #             ["RAnkle", "RHeel"] ]
 
             protoFile_body_25 = "pose/body_25/pose_deploy.prototxt"
             weightsFile_body_25 = "pose/body_25/pose_iter_584000.caffemodel"
@@ -99,6 +114,8 @@ class Skeleton:
                 out = self.net.forward()
                 points = []
 
+                self.file.write("[")
+                first = True
                 for i in range(len(self.BODY_PARTS)):
                     # Slice heatmap of corresponging body's part.
                     heatMap = out[0, i, :, :]
@@ -107,7 +124,12 @@ class Skeleton:
                     x = (self.frameWidth * point[0]) / out.shape[3]
                     y = (self.frameHeight * point[1]) / out.shape[2]
                     points.append((int(x), int(y)) if conf > self.thres else None)
-                    
+                    if first == False :
+                        self.file.write(",")
+                    self.file.write("(" + str(int(x)) + "," + str(int(y)) + ")")
+                    first = False
+                
+                self.file.write("]\n")
                 for pair in self.POSE_PAIRS:
                     partFrom = pair[0]
                     partTo = pair[1]
@@ -130,7 +152,7 @@ class Skeleton:
 
                 self.result.write(frame)
 
-                cv2.imshow('pose', frame)
+                # cv2.imshow('pose', frame)
 
                 print("Time to process frame in sec: " + str(end_time - start_time))
                 
@@ -145,6 +167,7 @@ class Skeleton:
         self.cap.release()
         self.result.release()
         cv2.destroyAllWindows() 
+        self.file.close()
 
 
 def main():
