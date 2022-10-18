@@ -1,4 +1,3 @@
-from curses.ascii import RS
 import math
 
 # Distance formula returns distance between 2 points
@@ -22,7 +21,7 @@ def law_cosines(p1, p2, p3):
 def get_frames(file):
     frames = []
 
-    #Hard coded order of points to ensure compatibility with all versions of Python
+    # Hard coded order of points to ensure compatibility with all versions of Python
     entries = ["nose", "neck", "Rshoulder", "Relbow", "Rwrist", "Lshoulder", "Lelbow", "Lwrist", "Rhip", "Rknee", "Rankle", "Lhip", "Lknee", "Lankle", "Reye", "Leye", "Rear", "Lear", "background"]
 
     f = open(file)
