@@ -1,6 +1,7 @@
 import cv2
 import time
 import parser
+import numpy as np
 
 
 # select if its front or side 
@@ -10,6 +11,7 @@ class Skeleton:
         self.device = device
         self.thres = thres
         self.file = open("points.txt", "w")
+        cv2.useOptimized()
 
         if model == "BODY_25":
             print("Using BODY_25 model")
@@ -25,6 +27,7 @@ class Skeleton:
                         ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
                         ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"] ]
 
+            # ==================================================================================================
             # The original BODY_25 points
             # self.BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
             #             "LShoulder": 5, "LElbow": 6, "LWrist": 7, "MidHip": 8, "RHip": 9, "RKnee": 10,
@@ -39,6 +42,7 @@ class Skeleton:
             #             ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"], ["LAnkle", "LBigToe"],
             #             ["LAnkle", "LSmallToe"], ["LAnkle", "LHeel"], ["RAnkle", "RBigToe"], ["RAnkle", "RSmallToe"],
             #             ["RAnkle", "RHeel"] ]
+            # ==================================================================================================
 
             protoFile_body_25 = "pose/body_25/pose_deploy.prototxt"
             weightsFile_body_25 = "pose/body_25/pose_iter_584000.caffemodel"
@@ -99,23 +103,25 @@ class Skeleton:
 
         frame_count = 0
         total_fps = 0
+
+        print("Skeleton extraction begins...")
+
+        cv2.namedWindow("Display", cv2.WINDOW_AUTOSIZE)
         
         while(True):
 
-            print("Frame {} Processing".format(frame_count))
+            # print("Frame {} Processing".format(frame_count))
 
             start_time = time.time()
             
             ret, frame = self.cap.read()
 
             if ret == True:
-            
+
                 self.net.setInput(cv2.dnn.blobFromImage(frame, 1.0 / 255, (368, 368), (0, 0, 0), swapRB=False, crop=False))
                 out = self.net.forward()
                 points = []
 
-                self.file.write("[")
-                first = True
                 for i in range(len(self.BODY_PARTS)):
                     # Slice heatmap of corresponging body's part.
                     heatMap = out[0, i, :, :]
@@ -124,12 +130,10 @@ class Skeleton:
                     x = (self.frameWidth * point[0]) / out.shape[3]
                     y = (self.frameHeight * point[1]) / out.shape[2]
                     points.append((int(x), int(y)) if conf > self.thres else None)
-                    if first == False :
-                        self.file.write(",")
-                    self.file.write("(" + str(int(x)) + "," + str(int(y)) + ")")
-                    first = False
-                
-                self.file.write("]\n")
+
+                # Write the points to file for analysis
+                self.file.write(str(points) + '\n')
+
                 for pair in self.POSE_PAIRS:
                     partFrom = pair[0]
                     partTo = pair[1]
@@ -152,11 +156,12 @@ class Skeleton:
 
                 self.result.write(frame)
 
-                # cv2.imshow('pose', frame)
+                cv2.imshow("Display", frame)
 
-                print("Time to process frame in sec: " + str(end_time - start_time))
+                # print("Time to process frame in sec: " + str(end_time - start_time))
+                key = cv2.waitKey(1)
                 
-                if cv2.waitKey(1) & 0xFF == ord('q'):
+                if key == ord('q') or key == 27 or (cv2.getWindowProperty('Display', cv2.WND_PROP_AUTOSIZE) < 0):
                     avg_fps = total_fps / frame_count
                     return avg_fps
             else :
