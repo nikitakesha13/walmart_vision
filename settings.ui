@@ -65,6 +65,9 @@ border-color: rgba(255, 255, 255, 0);</string>
     <property name="text">
      <string>CPU</string>
     </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
    </widget>
    <widget class="QRadioButton" name="gpuOption">
     <property name="geometry">
@@ -130,6 +133,9 @@ border-color: rgba(255, 255, 255, 0);</string>
     <property name="text">
      <string>Body-25</string>
     </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
    </widget>
   </widget>
   <widget class="QLabel" name="label">
@@ -154,9 +160,21 @@ border-color: rgba(255, 255, 255, 0);</string>
      <height>21</height>
     </rect>
    </property>
+   <property name="cursor">
+    <cursorShape>ArrowCursor</cursorShape>
+   </property>
    <property name="styleSheet">
     <string notr="true">background-color: rgb(255, 255, 255);
 color: rgb(44, 44, 44);</string>
+   </property>
+   <property name="minimum">
+    <double>0.100000000000000</double>
+   </property>
+   <property name="singleStep">
+    <double>0.010000000000000</double>
+   </property>
+   <property name="value">
+    <double>0.100000000000000</double>
    </property>
   </widget>
  </widget>

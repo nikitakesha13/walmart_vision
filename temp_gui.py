@@ -13,19 +13,35 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from cv2 import threshold
 from niosh_dialog import Ui_nioshDialog
 from pose_estimation_Video import Skeleton
-from settings_dialog import Ui_settingsDialog
+#from settings_dialog import Ui_settingsDialog
 from pose_estimation_Video import Skeleton
 
-source = 0
-device = "cpu"
-model = "BODY_25"
-thres = 0.4
-
 class Ui_MainWindow(object):
+    def __init__(self, _source, _device, _model, _thres):
+        self.source = _source
+        self.device = _device
+        self.model = _model
+        self.thres = _thres
+
+    def setSource(self, _source):
+        self.source = _source
+    def setDevice(self, _device):
+        self.device = _device
+    def setModel(self, _model):
+        self.model = _model
+    def setThreshold(self, _thres):
+        self.thres = _thres
+
+    def setUser(self, name):
+        self.nameLabel.setText(name)
+
     def newRecording(self):
-        skeleton = Skeleton(source, device, model, thres)
+        from settings_dialog import Ui_settingsDialog 
+        setting_input = Ui_settingsDialog(self.device, self.model, self.thres, self)
+        skeleton = Skeleton(self.source, self.setting_input.getDevice(), self.setting_input.getModel(), self.setting_input.getThreshold())
         avg_fps = skeleton.pose_estimation()
         skeleton.release()
+        print("Using", self.setting_input.getMode())
         print(f"Average FPS: {avg_fps:.3f}")
 
     def openNIOSH(self):
@@ -35,8 +51,9 @@ class Ui_MainWindow(object):
         self.window.show()
     
     def openSettings(self):
+        from settings_dialog import Ui_settingsDialog
         self.window = QtWidgets.QDialog()
-        self.ui = Ui_settingsDialog()
+        self.ui = Ui_settingsDialog(self.device, self.model, self.thres, self)
         self.ui.setupUi(self.window)
         self.window.show()
 
@@ -192,7 +209,7 @@ if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
+    ui = Ui_MainWindow(0, "cpu", "BODY_25", 0.1)
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
