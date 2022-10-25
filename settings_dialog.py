@@ -15,14 +15,11 @@ class Ui_settingsDialog(object):
     def setupUi(self, settingsDialog):
         settingsDialog.setObjectName("settingsDialog")
         settingsDialog.resize(461, 294)
-        settingsDialog.setStyleSheet("background-color: rgb(44, 44, 44);\n"
-"color: rgb(255, 255, 255);")
+        settingsDialog.setStyleSheet("background-color: rgb(44, 44, 44); color: rgb(255, 255, 255);")
         self.buttonBox = QtWidgets.QDialogButtonBox(settingsDialog)
         self.buttonBox.setEnabled(True)
         self.buttonBox.setGeometry(QtCore.QRect(360, 30, 81, 161))
-        self.buttonBox.setStyleSheet("background-color: rgb(255, 255, 255);\n"
-"color: rgb(44, 44, 44);\n"
-"border-color: rgba(255, 255, 255, 0);")
+        self.buttonBox.setStyleSheet("background-color: rgb(255, 255, 255); color: rgb(44, 44, 44); border-color: rgba(255, 255, 255, 0);")
         self.buttonBox.setOrientation(QtCore.Qt.Vertical)
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName("buttonBox")
@@ -52,8 +49,7 @@ class Ui_settingsDialog(object):
         self.label.setObjectName("label")
         self.doubleSpinBox = QtWidgets.QDoubleSpinBox(settingsDialog)
         self.doubleSpinBox.setGeometry(QtCore.QRect(90, 230, 241, 21))
-        self.doubleSpinBox.setStyleSheet("background-color: rgb(255, 255, 255);\n"
-"color: rgb(44, 44, 44);")
+        self.doubleSpinBox.setStyleSheet("background-color: rgb(255, 255, 255); color: rgb(44, 44, 44);")
         self.doubleSpinBox.setObjectName("doubleSpinBox")
 
         self.retranslateUi(settingsDialog)
