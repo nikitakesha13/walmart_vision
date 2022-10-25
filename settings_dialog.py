@@ -1,5 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from matplotlib.pyplot import close
 from temp_gui import Ui_MainWindow
+import sys
 
 #default value for skeletal extraction
 
@@ -115,7 +117,6 @@ class Ui_settingsDialog(object):
 
 
 if __name__ == "__main__":
-        import sys
         app = QtWidgets.QApplication(sys.argv)
         settingsDialog = QtWidgets.QDialog()
         ui = Ui_settingsDialog()
