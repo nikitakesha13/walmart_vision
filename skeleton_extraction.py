@@ -1,17 +1,26 @@
 import cv2
 import time
 import parser
-import numpy as np
+import datetime
 
 
 # select if its front or side 
 class Skeleton:
-    def __init__(self, source, device, model, thres):
+    def __init__(self, name, source, device, model, thres):
+
+        self.name = "test-video-out/"
+        if name == None:
+            self.name += datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+
+        else :
+            self.name += name
+            
+        self.name += "_skeleton.avi"
+
         self.source = source
         self.device = device
         self.thres = thres
         self.file = open("points.txt", "w")
-        cv2.useOptimized()
 
         if model == "BODY_25":
             print("Using BODY_25 model")
@@ -63,7 +72,7 @@ class Skeleton:
             weightsFile_mpi = "pose/mpi/pose_iter_160000.caffemodel"
             self.net = cv2.dnn.readNetFromCaffe(protoFile_mpi, weightsFile_mpi)
 
-        else: # COCO is default model
+        elif model == "COCO": # COCO is default model
             print("Using COCO model")
             self.BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
                         "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
@@ -79,6 +88,10 @@ class Skeleton:
             protoFile_coco = "pose/coco/pose_deploy_linevec.prototxt"
             weightsFile_coco = "pose/coco/pose_iter_440000.caffemodel"
             self.net = cv2.dnn.readNetFromCaffe(protoFile_coco, weightsFile_coco)
+        
+        else:
+            print("The model does not exist. Possible models: COCO, MPI, BODY_25")
+            exit(0)
 
         if (device == "gpu"):
             self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
@@ -97,7 +110,7 @@ class Skeleton:
 
         size = (self.frameWidth, self.frameHeight)
 
-        self.result = cv2.VideoWriter("test-video-out/out.avi", cv2.VideoWriter_fourcc('M','J','P','G'), 30, size)
+        self.result = cv2.VideoWriter(self.name, cv2.VideoWriter_fourcc('M','J','P','G'), 30, size)
     
     def pose_estimation(self):
 
@@ -180,7 +193,7 @@ def main():
     if args.source == '0':
         args.source = 0
 
-    skeleton = Skeleton(args.source, args.device, args.model, args.thres)
+    skeleton = Skeleton(args.name, args.source, args.device, args.model, args.thres)
     avg_fps = skeleton.pose_estimation()
     skeleton.release()
 
