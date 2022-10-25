@@ -83,7 +83,6 @@ def check_elbows(frame):
     return "Good - Arms"
 
 
-
 def analysis(frames):
     tolerance = 5
     # Individual frame checks
