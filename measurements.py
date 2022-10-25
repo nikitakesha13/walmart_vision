@@ -58,6 +58,18 @@ def get_frames(file):
     
     return frames
 
+def get_direction(frame):
+    nose = frame["nose"]
+    # Assume using either ear will work for calculation. Arbitrarily chose right ear
+    ear = frame["Rear"]
+
+    if (nose[0] > ear[0]):
+        return "R"
+    elif (nose[0] < ear[0]):
+        return "L"
+    else:
+        return "F"
+
 def get_measurements(frame):
     measurements = {
         "RKnee Angle" : law_cosines(frame["Rankle"], frame["Rknee"], frame["Rhip"]),
@@ -68,11 +80,14 @@ def get_measurements(frame):
         "LElbow Angle" : law_cosines(frame["Lshoulder"], frame["Lelbow"], frame["Lwrist"]),
         "RArmPit Angle" : law_cosines(frame["Rhip"], frame["Rshoulder"], frame["Rwrist"]),
         "LArmPit Angle" : law_cosines(frame["Lhip"], frame["Lshoulder"], frame["Lwrist"]),
-        "Spinal Length" : -1
+        "Spinal Length" : -1,
+        "Direction Facing" : -1
     }
 
     tailbone = ((frame["Lhip"][0] + frame["Rhip"][0]) / 2, (frame["Lhip"][1] + frame["Rhip"][1]) / 2)
     measurements["Spinal Length"] = distance(tailbone, frame["neck"])
+    
+    measurements["Direction Facing"] = get_direction(frame)
 
     return measurements
 
