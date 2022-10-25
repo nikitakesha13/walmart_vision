@@ -1,3 +1,5 @@
+#Collection of helper functions that may be used many times
+
 class Misc:
     def convertToLb(self, weight, unit):
         if (unit == "kg"):
@@ -13,5 +15,7 @@ class Misc:
             return self.convertToInch(len * 100.0, "cm")
         return len
     
+    #strip leading and trailing zeroes
+    #convert spaces between into underscores
     def cleanName(self, name):
         return ((name.strip()).replace(" ", "_")).lower()

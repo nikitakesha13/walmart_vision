@@ -6,8 +6,6 @@ from skeleton_extraction import Skeleton
 from datetime import datetime
 from misc import Misc
 
-
-
 class Ui_MainWindow(object):
     def __init__(self):
         self.helper = Misc()
