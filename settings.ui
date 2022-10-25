@@ -6,21 +6,33 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>459</width>
-    <height>282</height>
+    <width>461</width>
+    <height>294</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Settings</string>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(44, 44, 44);
+color: rgb(255, 255, 255);</string>
+  </property>
+  <widget class="QDialogButtonBox" name="settingButton">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>360</x>
      <y>30</y>
      <width>81</width>
-     <height>71</height>
+     <height>161</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255);
+color: rgb(44, 44, 44);
+border-color: rgba(255, 255, 255, 0);</string>
    </property>
    <property name="orientation">
     <enum>Qt::Vertical</enum>
@@ -29,10 +41,10 @@
     <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
    </property>
   </widget>
-  <widget class="QGroupBox" name="groupBox">
+  <widget class="QGroupBox" name="deviceBox">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>20</x>
      <y>20</y>
      <width>311</width>
      <height>71</height>
@@ -41,7 +53,7 @@
    <property name="title">
     <string>Device</string>
    </property>
-   <widget class="QRadioButton" name="radioButton">
+   <widget class="QRadioButton" name="cpuOption">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -54,7 +66,7 @@
      <string>CPU</string>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton_2">
+   <widget class="QRadioButton" name="gpuOption">
     <property name="geometry">
      <rect>
       <x>120</x>
@@ -68,10 +80,10 @@
     </property>
    </widget>
   </widget>
-  <widget class="QGroupBox" name="groupBox_2">
+  <widget class="QGroupBox" name="modelBox">
    <property name="geometry">
     <rect>
-     <x>30</x>
+     <x>20</x>
      <y>120</y>
      <width>311</width>
      <height>71</height>
@@ -80,7 +92,7 @@
    <property name="title">
     <string>Model</string>
    </property>
-   <widget class="QRadioButton" name="radioButton_5">
+   <widget class="QRadioButton" name="cocoOption">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -93,7 +105,7 @@
      <string>COCO</string>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton_6">
+   <widget class="QRadioButton" name="mpiOption">
     <property name="geometry">
      <rect>
       <x>120</x>
@@ -106,7 +118,7 @@
      <string>MPI</string>
     </property>
    </widget>
-   <widget class="QRadioButton" name="radioButton_7">
+   <widget class="QRadioButton" name="body25Option">
     <property name="geometry">
      <rect>
       <x>210</x>
@@ -123,8 +135,8 @@
   <widget class="QLabel" name="label">
    <property name="geometry">
     <rect>
-     <x>30</x>
-     <y>230</y>
+     <x>20</x>
+     <y>240</y>
      <width>61</width>
      <height>16</height>
     </rect>
@@ -133,21 +145,25 @@
     <string>Threshold</string>
    </property>
   </widget>
-  <widget class="QDoubleSpinBox" name="doubleSpinBox">
+  <widget class="QDoubleSpinBox" name="thresholdBox">
    <property name="geometry">
     <rect>
-     <x>100</x>
-     <y>230</y>
+     <x>90</x>
+     <y>240</y>
      <width>241</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255);
+color: rgb(44, 44, 44);</string>
    </property>
   </widget>
  </widget>
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>settingButton</sender>
    <signal>accepted()</signal>
    <receiver>settingsDialog</receiver>
    <slot>accept()</slot>
@@ -163,7 +179,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>settingButton</sender>
    <signal>rejected()</signal>
    <receiver>settingsDialog</receiver>
    <slot>reject()</slot>

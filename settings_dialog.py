@@ -14,14 +14,20 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_settingsDialog(object):
     def setupUi(self, settingsDialog):
         settingsDialog.setObjectName("settingsDialog")
-        settingsDialog.resize(459, 282)
+        settingsDialog.resize(461, 294)
+        settingsDialog.setStyleSheet("background-color: rgb(44, 44, 44);\n"
+"color: rgb(255, 255, 255);")
         self.buttonBox = QtWidgets.QDialogButtonBox(settingsDialog)
-        self.buttonBox.setGeometry(QtCore.QRect(360, 30, 81, 71))
+        self.buttonBox.setEnabled(True)
+        self.buttonBox.setGeometry(QtCore.QRect(360, 30, 81, 161))
+        self.buttonBox.setStyleSheet("background-color: rgb(255, 255, 255);\n"
+"color: rgb(44, 44, 44);\n"
+"border-color: rgba(255, 255, 255, 0);")
         self.buttonBox.setOrientation(QtCore.Qt.Vertical)
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName("buttonBox")
         self.groupBox = QtWidgets.QGroupBox(settingsDialog)
-        self.groupBox.setGeometry(QtCore.QRect(30, 20, 311, 71))
+        self.groupBox.setGeometry(QtCore.QRect(20, 20, 311, 71))
         self.groupBox.setObjectName("groupBox")
         self.radioButton = QtWidgets.QRadioButton(self.groupBox)
         self.radioButton.setGeometry(QtCore.QRect(20, 30, 95, 20))
@@ -30,7 +36,7 @@ class Ui_settingsDialog(object):
         self.radioButton_2.setGeometry(QtCore.QRect(120, 30, 95, 20))
         self.radioButton_2.setObjectName("radioButton_2")
         self.groupBox_2 = QtWidgets.QGroupBox(settingsDialog)
-        self.groupBox_2.setGeometry(QtCore.QRect(30, 120, 311, 71))
+        self.groupBox_2.setGeometry(QtCore.QRect(20, 120, 311, 71))
         self.groupBox_2.setObjectName("groupBox_2")
         self.radioButton_5 = QtWidgets.QRadioButton(self.groupBox_2)
         self.radioButton_5.setGeometry(QtCore.QRect(20, 30, 95, 20))
@@ -42,10 +48,12 @@ class Ui_settingsDialog(object):
         self.radioButton_7.setGeometry(QtCore.QRect(210, 30, 95, 20))
         self.radioButton_7.setObjectName("radioButton_7")
         self.label = QtWidgets.QLabel(settingsDialog)
-        self.label.setGeometry(QtCore.QRect(30, 230, 61, 16))
+        self.label.setGeometry(QtCore.QRect(20, 230, 61, 16))
         self.label.setObjectName("label")
         self.doubleSpinBox = QtWidgets.QDoubleSpinBox(settingsDialog)
-        self.doubleSpinBox.setGeometry(QtCore.QRect(100, 230, 241, 22))
+        self.doubleSpinBox.setGeometry(QtCore.QRect(90, 230, 241, 21))
+        self.doubleSpinBox.setStyleSheet("background-color: rgb(255, 255, 255);\n"
+"color: rgb(44, 44, 44);")
         self.doubleSpinBox.setObjectName("doubleSpinBox")
 
         self.retranslateUi(settingsDialog)

@@ -9,10 +9,24 @@
 
 from cProfile import label
 from PyQt5 import QtCore, QtGui, QtWidgets
+from cv2 import threshold
 from niosh_dialog import Ui_nioshDialog
+from pose_estimation_Video import Skeleton
 from settings_dialog import Ui_settingsDialog
+from pose_estimation_Video import Skeleton
+
+source = 0
+device = "cpu"
+model = "BODY_25"
+thres = 0.4
 
 class Ui_MainWindow(object):
+    def newRecording(self):
+        skeleton = Skeleton(source, device, model, thres)
+        avg_fps = skeleton.pose_estimation()
+        skeleton.release()
+        print(f"Average FPS: {avg_fps:.3f}")
+
     def openNIOSH(self):
         self.window = QtWidgets.QDialog()
         self.ui = Ui_nioshDialog()
@@ -61,7 +75,7 @@ class Ui_MainWindow(object):
         self.toolBar.setFloatable(False)
         self.toolBar.setObjectName("toolBar")
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
-        self.actionRecord = QtWidgets.QAction(MainWindow)
+        self.actionRecord = QtWidgets.QAction(MainWindow, triggered = lambda:self.newRecording())
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("icon/rec.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionRecord.setIcon(icon)
@@ -86,6 +100,7 @@ class Ui_MainWindow(object):
         icon4.addPixmap(QtGui.QPixmap("icon/info.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionInfo.setIcon(icon4)
         self.actionInfo.setObjectName("actionInfo")
+        
         self.toolBar.addAction(self.actionRecord)
         self.toolBar.addAction(self.actionOpen)
         self.toolBar.addAction(self.actionCalculator)
