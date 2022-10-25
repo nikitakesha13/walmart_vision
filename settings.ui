@@ -17,30 +17,6 @@
    <string notr="true">background-color: rgb(44, 44, 44);
 color: rgb(255, 255, 255);</string>
   </property>
-  <widget class="QDialogButtonBox" name="settingButton">
-   <property name="enabled">
-    <bool>true</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>360</x>
-     <y>30</y>
-     <width>81</width>
-     <height>161</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: rgb(255, 255, 255);
-color: rgb(44, 44, 44);
-border-color: rgba(255, 255, 255, 0);</string>
-   </property>
-   <property name="orientation">
-    <enum>Qt::Vertical</enum>
-   </property>
-   <property name="standardButtons">
-    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-   </property>
-  </widget>
   <widget class="QGroupBox" name="deviceBox">
    <property name="geometry">
     <rect>
@@ -131,7 +107,7 @@ border-color: rgba(255, 255, 255, 0);</string>
      </rect>
     </property>
     <property name="text">
-     <string>Body-25</string>
+     <string>BODY-25</string>
     </property>
     <property name="checked">
      <bool>true</bool>
@@ -177,40 +153,55 @@ color: rgb(44, 44, 44);</string>
     <double>0.100000000000000</double>
    </property>
   </widget>
+  <widget class="QPushButton" name="applyBttn">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>30</y>
+     <width>93</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255); color: rgb(44, 44, 44);</string>
+   </property>
+   <property name="text">
+    <string>Apply</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="restoreBttn">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>70</y>
+     <width>93</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255); color: rgb(44, 44, 44);</string>
+   </property>
+   <property name="text">
+    <string>Reset</string>
+   </property>
+  </widget>
+  <widget class="QDialogButtonBox" name="closeBttn">
+   <property name="geometry">
+    <rect>
+     <x>350</x>
+     <y>110</y>
+     <width>91</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: rgb(255, 255, 255); color: rgb(44, 44, 44);</string>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Close</set>
+   </property>
+  </widget>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>settingButton</sender>
-   <signal>accepted()</signal>
-   <receiver>settingsDialog</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>settingButton</sender>
-   <signal>rejected()</signal>
-   <receiver>settingsDialog</receiver>
-   <slot>reject()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>286</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
 </ui>

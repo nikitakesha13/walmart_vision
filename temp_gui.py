@@ -1,22 +1,38 @@
 from cProfile import label
+from re import U
 from PyQt5 import QtCore, QtGui, QtWidgets
 from cv2 import threshold
 from skeleton_extraction import Skeleton
+from datetime import datetime
+from misc import Misc
+
+
 
 class Ui_MainWindow(object):
     def __init__(self):
+        self.helper = Misc()
+
         self.source = 0
         self.device = "cpu"
         self.model = "BODY_25"
         self.thres = 0.1
 
         self.weight = 0
+        self.wu = "lb"
+
         self.grip = "Good"
-        self.freq = 0
-        self.freq = 0
+
+        self.freq = 1.0
+        self.fu = "second"
+
         self.objDist = 0
+        self.ou = "in"
+
         self.hDist = 0
+        self.hu = "in"
+
         self.vDist = 0
+        self.vu = "in"
 
     def setSource(self, _source):
         self.source = _source
@@ -27,35 +43,50 @@ class Ui_MainWindow(object):
     def setThreshold(self, _thres):
         self.thres = _thres
 
-    def setWeight(self, _w):
-        self.weight = _w
+    def setWeight(self, w, u):
+        self.weight = w
+        self.wu = u
+
     def setGrip(self, _g):
         self.grip = _g
-    def setFrequency(self, _f):
-        self.freq = _f
-    def setObjDist(self, _d):
-        self.objDist = _d
-    def setHDist(self, _h):
-        self.hDist = _h
-    def setVDist(self, _v):
-        self.vDist = _v
+   
+    def setFrequency(self, f, u):
+        self.fu = u
+        self.freq = f
 
-    def setUser(self, name):
-        self.nameLabel.setText(name)
+    def setObjDist(self, d, u):
+        self.objDist = d
+        self.ou = u
+
+    def setHDist(self, h, u):
+        self.hDist = h
+        self.hu = u
+
+    def setVDist(self, v, u):
+        self.vDist = v
+        self.vu = u
+
+    def accept(self):
+        self.nameLabel.setText((self.nameInput.toPlainText()).upper())
 
     def newRecording(self):
-        from settings_dialog import Ui_settingsDialog 
-        setting_input = Ui_settingsDialog(self.device, self.model, self.thres, self)
-        skeleton = Skeleton(self.source, self.setting_input.getDevice(), self.setting_input.getModel(), self.setting_input.getThreshold())
+        name = self.nameLabel.text()
+        if (name == "-"):
+            currentTime = datetime.now()
+            date = currentTime.strftime("%m%d%Y_%H%M%S")
+            name = "user_" + date
+
+        skeleton = Skeleton(self.helper.cleanName(name), self.source, self.device, self.model, self.thres)
         avg_fps = skeleton.pose_estimation()
         skeleton.release()
-        print("Using", self.setting_input.getMode())
+        print(name)
+        print("Using", self.model)
         print(f"Average FPS: {avg_fps:.3f}")
 
     def openNIOSH(self):
         from niosh_dialog import Ui_nioshDialog
         self.window = QtWidgets.QDialog()
-        self.ui = Ui_nioshDialog(self.weight, self.grip, self.freq, self.objDist, self.hDist, self.vDist, self)
+        self.ui = Ui_nioshDialog(self.weight, self.grip, self.freq, self.objDist, self.hDist, self.vDist, self.wu, self.fu, self.ou, self.hu, self.vu, self)
         self.ui.setupUi(self.window)
         self.window.show()
     
@@ -90,7 +121,7 @@ class Ui_MainWindow(object):
         self.label.setGeometry(QtCore.QRect(10, 30, 101, 16))
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(self.summaryBox)
-        self.label_2.setGeometry(QtCore.QRect(10, 50, 121, 16))
+        self.label_2.setGeometry(QtCore.QRect(10, 50, 131, 16))
         self.label_2.setObjectName("label_2")
         self.label_3 = QtWidgets.QLabel(self.summaryBox)
         self.label_3.setGeometry(QtCore.QRect(10, 70, 121, 16))
@@ -183,19 +214,20 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self.nameButton.accepted.connect(self.accept)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Walmart Vision"))
         self.summaryBox.setTitle(_translate("MainWindow", "Summary"))
         self.label.setText(_translate("MainWindow", "Current User:"))
-        self.label_2.setText(_translate("MainWindow", "Object Weight (in ):"))
+        self.label_2.setText(_translate("MainWindow", "Object Weight (lbs):"))
         self.label_3.setText(_translate("MainWindow", "NIOSH Risk Index:"))
         self.label_4.setText(_translate("MainWindow", "Model Used:"))
         self.nameLabel.setText(_translate("MainWindow", "-"))
         self.weightLabel.setText(_translate("MainWindow", "-"))
         self.riskLabel.setText(_translate("MainWindow", "-"))
-        self.modelLabel.setText(_translate("MainWindow", "-"))
+        self.modelLabel.setText(_translate("MainWindow", "BODY_25"))
         self.rcmBoard.setTitle(_translate("MainWindow", "Recommendations"))
         self.msgPrint.setText(_translate("MainWindow", "There\'s no activity"))
         self.label_6.setText(_translate("MainWindow", "Warning log"))
