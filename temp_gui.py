@@ -1,10 +1,7 @@
 from cProfile import label
 from PyQt5 import QtCore, QtGui, QtWidgets
 from cv2 import threshold
-#from niosh_dialog import Ui_nioshDialog
-from pose_estimation_Video import Skeleton
-#from settings_dialog import Ui_settingsDialog
-from pose_estimation_Video import Skeleton
+from skeleton_extraction import Skeleton
 
 class Ui_MainWindow(object):
     def __init__(self):
@@ -15,6 +12,7 @@ class Ui_MainWindow(object):
 
         self.weight = 0
         self.grip = "Good"
+        self.freq = 0
         self.freq = 0
         self.objDist = 0
         self.hDist = 0
@@ -28,6 +26,19 @@ class Ui_MainWindow(object):
         self.model = _model
     def setThreshold(self, _thres):
         self.thres = _thres
+
+    def setWeight(self, _w):
+        self.weight = _w
+    def setGrip(self, _g):
+        self.grip = _g
+    def setFrequency(self, _f):
+        self.freq = _f
+    def setObjDist(self, _d):
+        self.objDist = _d
+    def setHDist(self, _h):
+        self.hDist = _h
+    def setVDist(self, _v):
+        self.vDist = _v
 
     def setUser(self, name):
         self.nameLabel.setText(name)
@@ -44,7 +55,7 @@ class Ui_MainWindow(object):
     def openNIOSH(self):
         from niosh_dialog import Ui_nioshDialog
         self.window = QtWidgets.QDialog()
-        self.ui = Ui_nioshDialog(self.weight, self.grip, self.freq, self.objDist, self.hDist, self.vDist)
+        self.ui = Ui_nioshDialog(self.weight, self.grip, self.freq, self.objDist, self.hDist, self.vDist, self)
         self.ui.setupUi(self.window)
         self.window.show()
     
