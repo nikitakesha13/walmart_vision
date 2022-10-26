@@ -6,6 +6,7 @@ from PyQt5.QtCore import QDir, Qt, QUrl, QSize, QPoint, QTime, QMimeData, QProce
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer, QMediaMetaData
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtCore import QTimer, Qt
 import sys
 from cv2 import threshold
 from skeleton_extraction import Skeleton
@@ -37,6 +38,8 @@ class Ui_MainWindow(object):
 
         self.vDist = 0
         self.vu = "in"
+
+        self.timer = QTimer()
 
     def setDevice(self, _device):
         self.device = _device
@@ -78,9 +81,9 @@ class Ui_MainWindow(object):
             date = currentTime.strftime("%m%d%Y_%H%M%S")
             name = "user_" + date
 
-        skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres)
-        skeleton.pose_estimation()
-        skeleton.release()
+        self.skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres, self)
+        self.skeleton.pose_estimation()
+        self.skeleton.release()
     
     def newRecording(self):
         self.skeletonExtract(0)
@@ -123,9 +126,13 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         
         self.videoPlayer = QtWidgets.QWidget(self.centralwidget)
-        self.videoPlayer.setGeometry(QtCore.QRect(350, 40, 921, 461))
+        self.videoPlayer.setGeometry(QtCore.QRect(340, 40, 931, 461))
         self.videoPlayer.setStyleSheet("background-color: rgb(44, 44, 44)")
         self.videoPlayer.setObjectName("videoPlayer")
+
+        self.videoView = QtWidgets.QLabel(self.videoPlayer)
+        self.videoView.setGeometry(QtCore.QRect(160, 0, 615, 461))
+        self.videoView.setObjectName("videoView")
         
         self.summaryBox = QtWidgets.QGroupBox(self.centralwidget)
         self.summaryBox.setGeometry(QtCore.QRect(950, 520, 321, 121))
@@ -170,16 +177,16 @@ class Ui_MainWindow(object):
         self.rcmBoard.setObjectName("rcmBoard")
         
         self.msgBoard = QtWidgets.QScrollArea(self.centralwidget)
-        self.msgBoard.setGeometry(QtCore.QRect(10, 40, 331, 461))
+        self.msgBoard.setGeometry(QtCore.QRect(10, 40, 321, 461))
         self.msgBoard.setStyleSheet("color: rgb(255, 255, 255); background-color: rgb(44, 44, 44);")
         self.msgBoard.setWidgetResizable(True)
         self.msgBoard.setObjectName("msgBoard")
-        self.msgBoard.setWidget(self.scrollAreaWidgetContents)
-
+        
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 329, 459))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
-        
+        self.msgBoard.setWidget(self.scrollAreaWidgetContents)
+
         self.msgPrint = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.msgPrint.setGeometry(QtCore.QRect(100, 220, 111, 16))
         self.msgPrint.setObjectName("msgPrint")

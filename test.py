@@ -60,10 +60,14 @@ class MainWindow(QMainWindow):
         if ret == True:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             img = QImage(frame, frame.shape[1], frame.shape[0], QImage.Format_RGB888)
-            img = img.scaled(640, 480, Qt.KeepAspectRatio)
-            frame = cv2.circle(frame,(x_coor, y_coor),radius,color,thickness)
+            img = img.scaled(640, 600, Qt.KeepAspectRatio)
+            frame = cv2.circle(frame,(10, 10),10,color,thickness)
             pix = QPixmap.fromImage(img)
             self.vidWindow.setPixmap(pix)
+            key = cv2.waitKey(1)
+                
+            if key == ord('q') or key == 27:
+                print("A")
 
     def mousePressEvent(self, event):
         self.msgLabel.setText("Mouse Clicked!")
@@ -82,6 +86,11 @@ class MainWindow(QMainWindow):
         if self.cap.isOpened():
             self.cap.release()
         super().closeEvent(event)
+    
+    def keyPressEvent(self, event):
+        if self.cap.isOpened() and event.key() == Qt.Key_Escape:
+            self.cap.release()
+        return super().keyPressEvent(event)
 
 
 if __name__ == "__main__":
