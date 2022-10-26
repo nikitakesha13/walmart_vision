@@ -21,7 +21,10 @@ class Calc:
     #run for the  lifting index 
     def liftingIndex (self):
         #index is Lifting weight index = weight / RWL
-        index = float(self.weight) / self.RecommendWeight()
+        if (self.RecommendWeight() > 0):
+            index = float(self.weight) / self.RecommendWeight()
+        else:
+            return 1.1
         
         return index
 
