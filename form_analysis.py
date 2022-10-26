@@ -103,3 +103,4 @@ def analysis(frames):
         output.write(knees_bent_frames[x])
         output.write(elbow_height_frames[x])
         output.write("")
+<<<<<<< HEAD
