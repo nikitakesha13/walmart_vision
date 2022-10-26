@@ -82,3 +82,25 @@ def check_elbows(frame):
 
     return "Good - Arms"
 
+
+
+def analysis(frames):
+    tolerance = 5
+    # Individual frame checks
+    elbow_height_frames = []
+    back_lean_frames = []
+    for frame in frames:
+        elbow_height_frames.append(check_elbows(frame))
+        back_lean_frames.append(check_lean(frame, tolerance))
+    # Multiple frame checks
+    spine_length_frames = check_spine(frames, tolerance)
+    knees_bent_frames = check_knees(frames)
+
+    # Creare analysis output
+    output = open("analysis_results.txt", "w")
+    for x in range(len(elbow_height_frames)):
+        output.write(spine_length_frames[x])
+        output.write(back_lean_frames[x])
+        output.write(knees_bent_frames[x])
+        output.write(elbow_height_frames[x])
+        output.write("")
