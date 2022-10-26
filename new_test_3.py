@@ -1,4 +1,3 @@
-from operator import index
 import cv2, numpy as np
 import sys
 from time import sleep
@@ -8,13 +7,8 @@ def flick(x):
 
 cv2.namedWindow('image')
 cv2.moveWindow('image',250,150)
-cv2.namedWindow('controls')
-cv2.moveWindow('controls',250,50)
 
-controls = np.zeros((50,750),np.uint8)
-cv2.putText(controls, "W/w: Play, S/s: Stay, A/a: Prev, D/d: Next, E/e: Fast, Q/q: Slow, Esc: Exit", (40,20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255)
-
-video = sys.argv[1] 
+video = "test-video/run1.mp4"
 cap = cv2.VideoCapture(video)
 
 tots = cap.get(cv2.CAP_PROP_FRAME_COUNT)
@@ -22,24 +16,12 @@ i = 0
 cv2.createTrackbar('S','image', 0,int(tots)-1, flick)
 cv2.setTrackbarPos('S','image',0)
 
-cv2.createTrackbar('F','image', 1, 100, flick)
-frame_rate = 30
-cv2.setTrackbarPos('F','image',frame_rate)
-
 def process(im):
     return cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
 
 status = 'stay'
-center_coordinates = (120, 50)
-radius = 8
-color = (255, 0, 0)
-thickness = -1
-frame_no = 0
-x_coor = 0
-y_coor = 0
 
 while True:
-  cv2.imshow("controls",controls)
   try:
     if i==tots-1:
       i=0
@@ -51,28 +33,22 @@ while True:
     if im.shape[0]>600:
         im = cv2.resize(im, (500,500))
         controls = cv2.resize(controls, (im.shape[1],25))
-    frame_text = "Frame " + str(frame_no)
-    
-    cv2.putText(im, frame_text, (30,30),cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 1, cv2.LINE_AA, False)
-    im = cv2.circle(im,(x_coor, y_coor),radius,color,thickness)
+    #cv2.putText(im, status, )
     cv2.imshow('image', im)
     status = { ord('s'):'stay', ord('S'):'stay',
-                ord('w'):'play', ord('W'):'play',
-                ord('a'):'prev_frame', ord('A'):'prev_frame',
-                ord('d'):'next_frame', ord('D'):'next_frame',
+                13:'play',
+                75:'prev_frame',
+                77:'next_frame',
                 ord('q'):'slow', ord('Q'):'slow',
                 ord('e'):'fast', ord('E'):'fast',
                 ord('c'):'snap', ord('C'):'snap',
                 -1: status, 
-                27: 'exit'}[cv2.waitKey(10)]
+                27: 'exit'}[cv2.waitKey(1)]
 
     if status == 'play':
-      frame_rate = cv2.getTrackbarPos('F','image')
+      frame_rate = 30
       sleep((0.1-frame_rate/1000.0)**21021)
       i+=1
-      frame_no +=1
-      x_coor+=3
-      y_coor+=3
       cv2.setTrackbarPos('S','image',i)
       continue
     if status == 'stay':

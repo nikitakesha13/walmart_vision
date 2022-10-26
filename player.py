@@ -19,7 +19,7 @@ class VideoPlayer(QWidget):
         self.setAcceptDrops(True)
         self.mediaPlayer = QMediaPlayer(None, QMediaPlayer.StreamPlayback)
         self.mediaPlayer.mediaStatusChanged.connect(self.printMediaData)
-        self.mediaPlayer.setVolume(80)
+        self.mediaPlayer.setVolume(0)
         self.videoWidget = QVideoWidget(self)
         
         self.lbl = QLineEdit('00:00:00')
@@ -129,7 +129,7 @@ class VideoPlayer(QWidget):
         self.mediaPlayer.setMedia(QMediaContent(QUrl(self.myurl)))
         self.playButton.setEnabled(True)
         self.mediaPlayer.play()
-        self.hideSlider()
+        self.showSlider()
         print(self.myurl)
 
     def getYTUrl(self):
@@ -161,6 +161,7 @@ class VideoPlayer(QWidget):
         if fileName != '':
             self.loadFilm(fileName)
             print("File loaded")
+            print(fileName)
 
     def play(self):
         if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
@@ -441,7 +442,8 @@ font-weight: bold;
 if __name__ == '__main__':
 
     app = QApplication(sys.argv)
-    player = VideoPlayer('')
+    wg = QWidget()
+    player = VideoPlayer(wg)
     player.setAcceptDrops(True)
     player.setWindowTitle("QT5 Player")
     player.setWindowIcon(QIcon.fromTheme("multimedia-video-player"))
@@ -459,4 +461,4 @@ if __name__ == '__main__':
             player.playFromURL()
         else:
             player.loadFilm(sys.argv[1])
-sys.exit(app.exec_())
+#sys.exit(app.exec_())

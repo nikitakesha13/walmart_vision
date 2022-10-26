@@ -4,3 +4,4 @@ doc_image.sh
 docker_myapp.sh
 graph_opt.pb
 /__pycache__
+*ui

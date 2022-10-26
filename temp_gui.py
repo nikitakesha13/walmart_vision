@@ -1,16 +1,22 @@
 from cProfile import label
 from re import U
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtGui import QPalette, QKeySequence, QIcon
+from PyQt5.QtCore import QDir, Qt, QUrl, QSize, QPoint, QTime, QMimeData, QProcess, QEvent
+from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer, QMediaMetaData
+from PyQt5.QtMultimediaWidgets import QVideoWidget
+from PyQt5.QtWidgets import QFileDialog
+import sys
 from cv2 import threshold
 from skeleton_extraction import Skeleton
 from datetime import datetime
 from misc import Misc
+from player import VideoPlayer
 
 class Ui_MainWindow(object):
     def __init__(self):
         self.helper = Misc()
 
-        self.source = 0
         self.device = "cpu"
         self.model = "BODY_25"
         self.thres = 0.1
@@ -32,8 +38,6 @@ class Ui_MainWindow(object):
         self.vDist = 0
         self.vu = "in"
 
-    def setSource(self, _source):
-        self.source = _source
     def setDevice(self, _device):
         self.device = _device
     def setModel(self, _model):
@@ -66,20 +70,20 @@ class Ui_MainWindow(object):
 
     def accept(self):
         self.nameLabel.setText((self.nameInput.toPlainText()).upper())
-
-    def newRecording(self):
+    
+    def skeletonExtract(self, source):
         name = self.nameLabel.text()
         if (name == "-"):
             currentTime = datetime.now()
             date = currentTime.strftime("%m%d%Y_%H%M%S")
             name = "user_" + date
 
-        skeleton = Skeleton(self.helper.cleanName(name), self.source, self.device, self.model, self.thres)
-        avg_fps = skeleton.pose_estimation()
+        skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres)
+        skeleton.pose_estimation()
         skeleton.release()
-        print(name)
-        print("Using", self.model)
-        print(f"Average FPS: {avg_fps:.3f}")
+    
+    def newRecording(self):
+        self.skeletonExtract(0)
 
     def openNIOSH(self):
         from niosh_dialog import Ui_nioshDialog
@@ -94,6 +98,15 @@ class Ui_MainWindow(object):
         self.ui = Ui_settingsDialog(self.device, self.model, self.thres, self)
         self.ui.setupUi(self.window)
         self.window.show()
+    
+    def openFile(self):
+        fileName, _ = QFileDialog.getOpenFileName(None, "Open Video",
+                "./test-video", "Media (*.webm *.mp4 *.ts *.avi *.mpeg *.mpg *.mkv *.VOB *.m4v *.3gp *.mp3 *.m4a *.wav *.ogg *.flac *.m3u *.m3u8)")
+
+        if fileName != '':
+            print(fileName)
+            self.skeletonExtract(fileName)
+
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -105,71 +118,91 @@ class Ui_MainWindow(object):
         MainWindow.setStyleSheet("background-color: rgb(54, 54, 54); color: #fff;")
         MainWindow.setIconSize(QtCore.QSize(25, 25))
         MainWindow.setAnimated(True)
+        
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+        
         self.videoPlayer = QtWidgets.QWidget(self.centralwidget)
         self.videoPlayer.setGeometry(QtCore.QRect(350, 40, 921, 461))
         self.videoPlayer.setStyleSheet("background-color: rgb(44, 44, 44)")
         self.videoPlayer.setObjectName("videoPlayer")
+        
         self.summaryBox = QtWidgets.QGroupBox(self.centralwidget)
         self.summaryBox.setGeometry(QtCore.QRect(950, 520, 321, 121))
         self.summaryBox.setStyleSheet("")
         self.summaryBox.setObjectName("summaryBox")
+        
         self.label = QtWidgets.QLabel(self.summaryBox)
         self.label.setGeometry(QtCore.QRect(10, 30, 101, 16))
         self.label.setObjectName("label")
+        
         self.label_2 = QtWidgets.QLabel(self.summaryBox)
         self.label_2.setGeometry(QtCore.QRect(10, 50, 131, 16))
         self.label_2.setObjectName("label_2")
+        
         self.label_3 = QtWidgets.QLabel(self.summaryBox)
         self.label_3.setGeometry(QtCore.QRect(10, 70, 121, 16))
         self.label_3.setObjectName("label_3")
+        
         self.label_4 = QtWidgets.QLabel(self.summaryBox)
         self.label_4.setGeometry(QtCore.QRect(10, 90, 121, 16))
         self.label_4.setObjectName("label_4")
+        
         self.nameLabel = QtWidgets.QLabel(self.summaryBox)
         self.nameLabel.setGeometry(QtCore.QRect(150, 30, 161, 16))
         self.nameLabel.setObjectName("nameLabel")
+        
         self.weightLabel = QtWidgets.QLabel(self.summaryBox)
         self.weightLabel.setGeometry(QtCore.QRect(150, 50, 161, 16))
         self.weightLabel.setObjectName("weightLabel")
+        
         self.riskLabel = QtWidgets.QLabel(self.summaryBox)
         self.riskLabel.setGeometry(QtCore.QRect(150, 70, 161, 16))
         self.riskLabel.setObjectName("riskLabel")
+        
         self.modelLabel = QtWidgets.QLabel(self.summaryBox)
         self.modelLabel.setGeometry(QtCore.QRect(150, 90, 161, 16))
         self.modelLabel.setObjectName("modelLabel")
+        
         self.rcmBoard = QtWidgets.QGroupBox(self.centralwidget)
         self.rcmBoard.setGeometry(QtCore.QRect(10, 520, 931, 121))
         self.rcmBoard.setStyleSheet("")
         self.rcmBoard.setObjectName("rcmBoard")
+        
         self.msgBoard = QtWidgets.QScrollArea(self.centralwidget)
         self.msgBoard.setGeometry(QtCore.QRect(10, 40, 331, 461))
         self.msgBoard.setStyleSheet("color: rgb(255, 255, 255); background-color: rgb(44, 44, 44);")
         self.msgBoard.setWidgetResizable(True)
         self.msgBoard.setObjectName("msgBoard")
+        self.msgBoard.setWidget(self.scrollAreaWidgetContents)
+
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 329, 459))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
+        
         self.msgPrint = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         self.msgPrint.setGeometry(QtCore.QRect(100, 220, 111, 16))
         self.msgPrint.setObjectName("msgPrint")
-        self.msgBoard.setWidget(self.scrollAreaWidgetContents)
+        
         self.label_6 = QtWidgets.QLabel(self.centralwidget)
         self.label_6.setGeometry(QtCore.QRect(20, 20, 131, 16))
         self.label_6.setStyleSheet("")
         self.label_6.setObjectName("label_6")
+        
         self.nameInput = QtWidgets.QPlainTextEdit(self.centralwidget)
         self.nameInput.setGeometry(QtCore.QRect(890, 0, 231, 31))
         self.nameInput.setObjectName("nameInput")
+        
         self.nameButton = QtWidgets.QDialogButtonBox(self.centralwidget)
         self.nameButton.setGeometry(QtCore.QRect(1130, 0, 131, 28))
         self.nameButton.setStyleSheet("background-color: rgb(255, 255, 255); color: rgb(44, 44, 44);")
         self.nameButton.setStandardButtons(QtWidgets.QDialogButtonBox.Discard|QtWidgets.QDialogButtonBox.Save)
         self.nameButton.setObjectName("nameButton")
+        
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusBar = QtWidgets.QStatusBar(MainWindow)
         self.statusBar.setObjectName("statusBar")
+        
         MainWindow.setStatusBar(self.statusBar)
         self.toolBar = QtWidgets.QToolBar(MainWindow)
         self.toolBar.setStyleSheet("padding: 3px 5px;")
@@ -179,31 +212,37 @@ class Ui_MainWindow(object):
         self.toolBar.setObjectName("toolBar")
         self.toolBar.setStyleSheet("color: rgb(44, 44, 44)")
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
+        
         self.actionRecord = QtWidgets.QAction(MainWindow, triggered = lambda:self.newRecording())
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("icon/plus.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionRecord.setIcon(icon)
         self.actionRecord.setObjectName("actionRecord")
-        self.actionOpen = QtWidgets.QAction(MainWindow)
+        
+        self.actionOpen = QtWidgets.QAction(MainWindow, triggered = lambda:self.openFile())
         icon1 = QtGui.QIcon()
         icon1.addPixmap(QtGui.QPixmap("icon/folder (2).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionOpen.setIcon(icon1)
         self.actionOpen.setObjectName("actionOpen")
+        
         self.actionCalculator = QtWidgets.QAction(MainWindow, triggered = lambda: self.openNIOSH())
         icon2 = QtGui.QIcon()
         icon2.addPixmap(QtGui.QPixmap("icon/bar-chart (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionCalculator.setIcon(icon2)
         self.actionCalculator.setObjectName("actionCalculator")
+        
         self.actionSettings = QtWidgets.QAction(MainWindow, triggered = lambda: self.openSettings())
         icon3 = QtGui.QIcon()
         icon3.addPixmap(QtGui.QPixmap("icon/settings.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionSettings.setIcon(icon3)
         self.actionSettings.setObjectName("actionSettings")
+        
         self.actionInfo = QtWidgets.QAction(MainWindow)
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap("icon/information (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionInfo.setIcon(icon4)
         self.actionInfo.setObjectName("actionInfo")
+        
         self.toolBar.addAction(self.actionRecord)
         self.toolBar.addAction(self.actionOpen)
         self.toolBar.addAction(self.actionCalculator)
@@ -246,7 +285,6 @@ class Ui_MainWindow(object):
 
 
 if __name__ == "__main__":
-    import sys
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
