@@ -41,7 +41,7 @@ def warnings(index):
 #run the horizontal distance to get the HM factor
 def HMFactor(horizontialDist):
     hD = float(horizontialDist)
-    if(hD <= (25 * 2.54 )):
+    if(hD >=  0) and (hD <= (25 * 2.54 )):
         return 1.0
     elif ( hD > (25 * 2.54 ) and hD <= (30 * 2.54 )):
         return 0.83
