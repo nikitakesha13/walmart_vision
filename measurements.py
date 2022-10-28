@@ -1,4 +1,5 @@
 import math
+import string
 
 # Distance formula returns distance between 2 points
 def distance(p1, p2):
@@ -17,6 +18,33 @@ def law_cosines(p1, p2, p3):
 
     return degrees
 
+def remove_none(f):
+    # Create Matrix
+    frames = []
+    for line in f:
+        line.replace("[",'')
+        open_brace = -1
+        points = []
+        for i in range(len(line)):
+            if line[i] == '(':
+                open_brace = i
+            elif line[i] == ')':
+                point = eval(line[open_brace+1:i])
+                points.append(point)
+            elif line[i] == 'N':
+                points.append((-1,-1))
+        frames.append(points)
+    
+    for i in range(len(frames)):
+        for j in range(len(frames[i])):
+            if frames[i][j] == (-1,-1) and i == 0:
+                c = i + 1
+                while frames[i][j] == (-1,-1) and c < len(frames):
+                    frames[i][j] = frames[c][j]
+                    c+=1
+            elif frames[i][j] == (-1,-1):
+                frames[i][j] = frames[i-1][j]
+    return frames
 
 def get_frames(file):
     frames = []
@@ -25,8 +53,9 @@ def get_frames(file):
     entries = ["nose", "neck", "Rshoulder", "Relbow", "Rwrist", "Lshoulder", "Lelbow", "Lwrist", "Rhip", "Rknee", "Rankle", "Lhip", "Lknee", "Lankle", "Reye", "Leye", "Rear", "Lear", "background"]
 
     f = open(file)
+    input = remove_none(f)
 
-    for line in f:
+    for line in input:
         frame = {
             "nose" : (-1,-1),
             "neck" : (-1,-1),
@@ -49,10 +78,10 @@ def get_frames(file):
             "background" : (-1,-1)
         }
         point = 0
-        line = line.replace('[','').replace(']','').replace('(','').replace(')','').split(",")
-        line = [float(x) for x in line]
-        for x in range(0,len(line) - 1,2):
-            frame[entries[point]] = (line[x],line[x+1])
+        #line = line.replace('[','').replace(']','').replace('(','').replace(')','').split(",")
+        #line = [float(x) for x in line]
+        for x in line:
+            frame[entries[point]] = x
             point += 1
         frames.append(frame)
     
@@ -60,15 +89,18 @@ def get_frames(file):
 
 def get_direction(frame):
     nose = frame["nose"]
-    # Assume using either ear will work for calculation. Arbitrarily chose right ear
-    ear = frame["Rear"]
+    neck = frame["neck"]
 
-    if (nose[0] > ear[0]):
+    if (nose[0] >neck[0]):
         return "R"
-    elif (nose[0] < ear[0]):
+    elif (nose[0] < neck[0]):
         return "L"
     else:
         return "F"
+def get_spine_length(frame):
+    tailbone = ((frame["Lhip"][0] + frame["Rhip"][0]) / 2, (frame["Lhip"][1] + frame["Rhip"][1]) / 2)
+    return distance(tailbone, frame["neck"])
+
 
 def get_measurements(frame):
     measurements = {
@@ -91,3 +123,6 @@ def get_measurements(frame):
 
     return measurements
 
+# Testing
+f = open("points.txt")
+remove_none(f)
