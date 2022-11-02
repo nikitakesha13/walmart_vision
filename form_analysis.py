@@ -10,15 +10,20 @@ def check_spine(frames, tolerance):
     for frame in frames:
         spine_length = get_spine_length(frame)
 
+        # Results are inconclusive
         if (prev_spine == -1):
             prev_spine = spine_length
-            spine_status.append("Inconclusive - Spinal Length")
+            spine_status.append("Inconclusive - Spine Length")
             continue
-
+        
+        # Results are positive
         if (spine_length - prev_spine < tolerance):
-            spine_status.append("Good - Spinal Length")
+            spine_status.append("Good - Spine Length")
+
+        # Results are negative
         else:
-            spine_status.append("Bad - Spinal Length")
+            tailbone = ((frame["Lhip"][0] + frame["Rhip"][0]) / 2, (frame["Lhip"][1] + frame["Rhip"][1]) / 2)
+            spine_status.append("Bad - " + str(tailbone) + ", " + str(frame["neck"]))
         
         prev_spine = spine_length
 
@@ -30,13 +35,13 @@ def check_lean(frame, tolerance):
 
     if get_direction(frame) == "R":
         if frame["Rshoulder"][0] - frame["Rhip"][0] > tolerance:
-            return "Bad - Lean: R Shoulder X =" + str(frame["Rshoulder"][0]) + "  Hip X = " + str(frame["Rhip"][0])
+            return "Bad - " + str(frame["Rshoulder"]) + ", " + str(frame["Rhip"])
         else:
             return "Good - Lean"
 
     if get_direction(frame) == "L":
         if frame["Lshoulder"][0] - frame["Lhip"][0] > tolerance:
-            return "Bad - Lean: L Shoulder X =" + str(frame["Lshoulder"][0]) + "  Hip X = " + str(frame["Lhip"][0])
+            return "Bad - " + str(frame["Lshoulder"]) + ", " + str(frame["Lhip"])
         else:
             return "Good - Lean"
 
@@ -70,10 +75,13 @@ def check_knees(frames, tolerance):
         if prev_shoulder[1] < shoulder[1]:
             if direction == "R" and knee[0] - prev_knee[0] < tolerance:
                 knee_status.append("Good - Knees")
-            elif direction == "L" and knee[0] - prev_knee[0] < tolerance:
-                knee_status.append("Good - Knees")
             else:
-                knee_status.append("Bad - Knees")
+                if direction == "R":
+                    hip = frame["Rhip"]
+                else:
+                    hip = frame["Lhip"]
+
+                knee_status.append("Bad - " + str(knee) + ", " + str(hip))
         else:
             knee_status.append("Good - Knees")
 
@@ -82,9 +90,9 @@ def check_knees(frames, tolerance):
 # OSHA Taining Check: Should not lift an object above shoulder level
 def check_elbows(frame):
     if frame["Relbow"][1] < frame["Rshoulder"][1]:
-        return "Bad - Arms"
+        return "Bad - " + str(frame["Relbow"]) + ", " + str(frame["Rshoulder"])
     if frame["Lelbow"][1] < frame["Lshoulder"][1]:
-        return "Bad - Arms"
+        return "Bad - " + str(frame["Lelbow"]) + ", " + str(frame["Lshoulder"])
 
     return "Good - Arms"
 
@@ -104,11 +112,24 @@ def analysis(frames):
     # Creare analysis output
     output = open("analysis_results.txt", "w")
     for x in range(len(elbow_height_frames)):
-        output.write(spine_length_frames[x]+"\n")
-        output.write(back_lean_frames[x]+"\n")
-        output.write(knees_bent_frames[x]+"\n")
-        output.write(elbow_height_frames[x]+"\n")
-        output.write("\n")
+        frame = ""
+        num_bad = 0
+        if spine_length_frames[x][0:3] == "Bad":
+            frame += spine_length_frames[x][6:]+"\n"
+            num_bad += 1
+        if back_lean_frames[x][0:3] == "Bad":
+            frame += back_lean_frames[x][6:]+"\n"
+            num_bad += 1
+        if knees_bent_frames[x][0:3] == "Bad":
+            frame += knees_bent_frames[x][6:]+"\n"
+            num_bad += 1
+        if elbow_height_frames[x][0:3] == "Bad":
+            frame+= elbow_height_frames[x][6:]+"\n"
+            num_bad += 1
+        frame += "\n"
+        output.write(str(num_bad)+"\n")
+        output.write(frame)
+
 
 # Testing
 analysis(get_frames("points.txt"))
