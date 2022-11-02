@@ -73,7 +73,7 @@ class Ui_MainWindow(object):
             date = currentTime.strftime("%m%d%Y_%H%M%S")
             name = "user_" + date
 
-        self.skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres, self)
+        self.skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres)
         self.skeleton.pose_estimation()
         self.skeleton.release()
     

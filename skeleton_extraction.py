@@ -1,13 +1,12 @@
 import cv2
 import time
+import parser
 import datetime
 
-from PyQt5.QtGui import QImage, QPixmap
-from PyQt5.QtCore import Qt
 
 # select if its front or side 
 class Skeleton:
-    def __init__(self, name, source, device, model, thres, gui):
+    def __init__(self, name, source, device, model, thres):
 
         self.name = "test-video-out/"
         if name == None:
@@ -22,7 +21,6 @@ class Skeleton:
         self.device = device
         self.thres = thres
         self.file = open("points.txt", "w")
-        self.gui = gui
 
         if model == "BODY_25":
             print("Using BODY_25 model")
@@ -118,8 +116,15 @@ class Skeleton:
 
         frame_count = 0
         total_fps = 0
+
+        print("Skeleton extraction begins...")
+
+        cv2.namedWindow("Display", cv2.WINDOW_AUTOSIZE)
         
         while(True):
+
+            # print("Frame {} Processing".format(frame_count))
+
             start_time = time.time()
             
             ret, frame = self.cap.read()
@@ -161,17 +166,39 @@ class Skeleton:
                 fps = 1 / (end_time - start_time)
                 total_fps += fps
                 frame_count += 1
-                
-                img = QImage(frame, frame.shape[1], frame.shape[0], QImage.Format_RGB888).rgbSwapped()
-                img = img.scaled(1280, 720, Qt.KeepAspectRatio)
-                pix = QPixmap.fromImage(img)
-                self.gui.videoView.setPixmap(pix)
 
                 self.result.write(frame)
-                if (cv2.waitKey(1) == ord('q')):
-                    return -1
 
+                cv2.imshow("Display", frame)
+
+                # print("Time to process frame in sec: " + str(end_time - start_time))
+                key = cv2.waitKey(1)
+                
+                if key == ord('q') or key == 27 or (cv2.getWindowProperty('Display', cv2.WND_PROP_AUTOSIZE) < 0):
+                    avg_fps = total_fps / frame_count
+                    return avg_fps
+            else :
+                avg_fps = total_fps / frame_count
+                return avg_fps
+        
     def release(self):
         self.cap.release()
         self.result.release()
+        cv2.destroyAllWindows() 
         self.file.close()
+
+
+def main():
+    args = parser.parse_args()
+    if args.source == '0':
+        args.source = 0
+
+    skeleton = Skeleton(args.name, args.source, args.device, args.model, args.thres)
+    avg_fps = skeleton.pose_estimation()
+    skeleton.release()
+
+    print(f"Average FPS: {avg_fps:.3f}")
+    
+
+if __name__ == '__main__':
+    main()

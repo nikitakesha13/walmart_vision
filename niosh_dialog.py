@@ -49,7 +49,10 @@ class Ui_nioshDialog(object):
 		self.calcObj = Calc(misc.convertToInch(self.hDist, self.hUnit), misc.convertToInch(self.vDist, self.vUnit), misc.convertToInch(self.objDist, self.objDistUnit), self.grip, misc.convertToLb(self.weight, self.weightUnit))
 		niosh_in = self.calcObj.liftingIndex()
 
-		if (niosh_in < 1):
+		if (niosh_in == -1):
+				niosh_in = "Warning: VERY HIGH RISK"
+				self.gui.riskLabel.setStyleSheet("color: #f00;")
+		elif (niosh_in < 1):
 				niosh_in = str(round(niosh_in,5)) + " - NORMAL"
 				self.gui.riskLabel.setStyleSheet("color: lime;")
 		elif (niosh_in >= 1):
