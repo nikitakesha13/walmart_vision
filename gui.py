@@ -2,7 +2,8 @@ from re import U
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtCore import QTimer
-from skeleton_extraction import Skeleton
+# from skeleton_extraction import Skeleton
+from skeleton import Skeleton
 from datetime import datetime
 from misc import Misc
 
@@ -73,7 +74,8 @@ class Ui_MainWindow(object):
             date = currentTime.strftime("%m%d%Y_%H%M%S")
             name = "user_" + date
 
-        self.skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres, self)
+        # self.skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres, self)
+        self.skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres)
         self.skeleton.pose_estimation()
         self.skeleton.release()
     
