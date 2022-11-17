@@ -2,26 +2,30 @@ import cv2
 import time
 import datetime
 import REBA
+import os
 
 # select if its front or side 
 class Skeleton:
     def __init__(self, name, source, device, model, thres):
 
-        self.name = "test-video-out/"
-        if name == None:
-            self.name += datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        time_now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        path = "test-video-out/" + name + "_" + time_now + "/"
 
-        else :
-            self.name += name
+        try:
+            os.mkdir(path)
+        except OSError as error:
+            print(error)
             
-        self.name += "_skeleton.avi"
+        self.skeleton_name = path + "skeleton.avi"
+        self.original_name = path + "original.avi"
+        self.form_analysis_name = path + "form_analysis.avi"
 
         self.source = source
         self.device = device
         self.thres = thres
         self.model = model
         self.reba_arr = []
-        self.file = open("points.txt", "w")
+        self.file = open(path + "points.txt", "w")
 
         if model == "BODY_25" or model == "COCO":
 
@@ -83,26 +87,25 @@ class Skeleton:
 
         size = (self.frameWidth, self.frameHeight)
 
-        self.result = cv2.VideoWriter(self.name, cv2.VideoWriter_fourcc('M','J','P','G'), 30, size)
+        self.result = cv2.VideoWriter(self.skeleton_name, cv2.VideoWriter_fourcc('M','J','P','G'), 30, size)
+        self.original = cv2.VideoWriter(self.original_name, cv2.VideoWriter_fourcc('M','J','P','G'), 30, size)
+        self.form_analysis = cv2.VideoWriter(self.form_analysis_name, cv2.VideoWriter_fourcc('M','J','P','G'), 30, size)
     
     def pose_estimation(self):
 
         frame_count = 0
         total_fps = 0
-
         print("Skeleton extraction begins...")
 
         cv2.namedWindow("Display", cv2.WINDOW_AUTOSIZE)
         
         while(True):
 
-            # print("Frame {} Processing".format(frame_count))
-
             start_time = time.time()
-            
             ret, frame = self.cap.read()
 
             if ret == True:
+                self.original.write(frame)
 
                 self.net.setInput(cv2.dnn.blobFromImage(frame, 1.0 / 255, (368, 368), (0, 0, 0), swapRB=False, crop=False))
                 out = self.net.forward()
@@ -129,6 +132,15 @@ class Skeleton:
                 # Write the points to file for analysis
                 self.file.write(str(points) + '\n')
 
+                reba_points = points.copy()
+                reba = REBA.REBA(reba_points, self.model)
+                reba_calculation = reba.calculate_risk()
+                if reba_calculation != None :
+                    cv2.putText(frame, "REBA Score: " + str(reba_calculation[0]), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 0.75, (255,0,0), 2)
+                    self.reba_arr.append(reba_calculation)
+                
+                self.form_analysis.write(frame)
+
                 for pair in self.POSE_PAIRS:
                     partFrom = pair[0]
                     partTo = pair[1]
@@ -144,23 +156,13 @@ class Skeleton:
                         cv2.ellipse(frame, points[idTo], (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
                         cv2.putText(frame, str(partFrom), points[idFrom], cv2.FONT_HERSHEY_PLAIN, 1.0, (0,0,255), 2)
 
-
-                reba = REBA.REBA(points, self.model)
-                reba_calculation = reba.calculate_risk()
-                if reba_calculation != None :
-                    cv2.putText(frame, "REBA Score: " + str(reba_calculation[0]), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 0.75, (255,0,0), 2)
-                    self.reba_arr.append(reba_calculation)
-
                 end_time = time.time()
                 fps = 1 / (end_time - start_time)
                 total_fps += fps
                 frame_count += 1
 
                 self.result.write(frame)
-
                 cv2.imshow("Display", frame)
-
-                # print("Time to process frame in sec: " + str(end_time - start_time))
                 key = cv2.waitKey(1)
                 
                 if key == ord('q') or key == 27 or (cv2.getWindowProperty('Display', cv2.WND_PROP_AUTOSIZE) < 0):
@@ -170,7 +172,7 @@ class Skeleton:
                         min_index = self.reba_arr.index(min(self.reba_arr, key=lambda x:x[0]))
                         print("Max REBA score: ", self.reba_arr[max_index][0],  self.reba_arr[max_index][1])
                         print("Min REBA score: ", self.reba_arr[min_index][0], self.reba_arr[min_index][1])
-                    return avg_fps
+                    return [avg_fps, reba_max, reba_avg]
             else :
                 avg_fps = total_fps / frame_count
                 if len(self.reba_arr) > 0 :
@@ -183,5 +185,7 @@ class Skeleton:
     def release(self):
         self.cap.release()
         self.result.release()
+        self.original.release()
+        self.form_analysis.release()
         cv2.destroyAllWindows() 
         self.file.close()

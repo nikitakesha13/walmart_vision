@@ -76,8 +76,11 @@ class Ui_MainWindow(object):
 
         # self.skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres, self)
         self.skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres)
-        self.skeleton.pose_estimation()
+        arr = self.skeleton.pose_estimation()
         self.skeleton.release()
+        # arr = [average_fps, reba_max, reba_average]
+        # Reba_Average = arr[2]
+        # Reba_Max = arr[1]
     
     def newRecording(self):
         self.skeletonExtract(0)
