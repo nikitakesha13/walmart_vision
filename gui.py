@@ -1,16 +1,13 @@
 from re import U
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import QDir, Qt, QUrl
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtWidgets import QFileDialog, QPushButton, QHBoxLayout, QVBoxLayout, QSlider, QLabel, QSizePolicy, QStyle
 from PyQt5.QtCore import QTimer
-# from skeleton_extraction import Skeleton
 from skeleton import Skeleton
 from datetime import datetime
 from misc import Misc
 from test import Play
 from PyQt5.QtCore import QTimer, Qt
-import cv2, numpy as np
 from time import sleep
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
@@ -198,12 +195,9 @@ class Ui_MainWindow(object):
 
         controlLayout = QHBoxLayout()
         controlLayout.setContentsMargins(0, 0, 0, 0)
-        #controlLayout.addWidget(self.playButton)
-        #controlLayout.addWidget(self.positionSlider)
 
         self.layout = QVBoxLayout()
         self.layout.addLayout(controlLayout)
-        #self.layout.addWidget(self.errorLabel)
         self.videoPlayer.setLayout(self.layout)
         
         self.summaryBox = QtWidgets.QGroupBox(self.centralwidget)
