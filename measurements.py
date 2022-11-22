@@ -16,16 +16,16 @@ def create_dicts(matrix):
 
     for entry in matrix:
         frame = {
-            "nose" : (-1,-1),
-            "neck" : (-1,-1),
-            "Rshoulder" : (-1,-1),
-            "Relbow" : (-1,-1),
-            "Lshoulder" : (-1,-1),
-            "Lelbow" : (-1,-1),
-            "Rhip" : (-1,-1),
-            "Rknee" : (-1,-1),
-            "Lhip" : (-1,-1),
-            "Lknee" : (-1,-1),
+            "nose" : None,
+            "neck" : None,
+            "Rshoulder" : None,
+            "Relbow" : None,
+            "Lshoulder" : None,
+            "Lelbow" : None,
+            "Rhip" : None,
+            "Rknee" : None,
+            "Lhip" : None,
+            "Lknee" : None
         }
         point = 0
         for x in entry:
