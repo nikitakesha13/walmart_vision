@@ -8,6 +8,7 @@ import os
 class Skeleton:
     def __init__(self, name, source, device, model, thres):
 
+        print("Using " + device)
         time_now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         path = "test-video-out/" + name + "_" + time_now + "/"
 
@@ -17,58 +18,49 @@ class Skeleton:
             print(error)
             
         self.skeleton_name = path + "skeleton.avi"
-        self.original_name = path + "original.avi"
         self.form_analysis_name = path + "form_analysis.avi"
 
         self.source = source
         self.device = device
         self.thres = thres
         self.model = model
+        self.average_fps = 0
+        self.reba_max = 0
+        self.reba_avg = 0
+        self.form_analysis_matrix = []
         self.reba_arr = []
-        self.file = open(path + "points.txt", "w")
 
-        if model == "BODY_25" or model == "COCO":
-
-            self.BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
-                        "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
-                        "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "REye": 14,
-                        "LEye": 15, "REar": 16, "LEar": 17, "Background": 18 }
-
-            self.POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
-                        ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
-                        ["Neck", "RHip"], ["RHip", "RKnee"], ["RKnee", "RAnkle"], ["Neck", "LHip"],
-                        ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
-                        ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"] ]
-
-            if model == "BODY_25":
+        if model == "BODY_25" or model == "COCO" :
+            element_zero = "Nose"
+            if model == "BODY_25" :
                 print("Using BODY_25 model")
-                protoFile_body_25 = "pose/body_25/pose_deploy.prototxt"
-                weightsFile_body_25 = "pose/body_25/pose_iter_584000.caffemodel"
-                self.net = cv2.dnn.readNetFromCaffe(protoFile_body_25, weightsFile_body_25)
+                protoFile = "pose/body_25/pose_deploy.prototxt"
+                weightsFile = "pose/body_25/pose_iter_584000.caffemodel"
             else :
                 print("Using COCO model")
-                protoFile_coco = "pose/coco/pose_deploy_linevec.prototxt"
-                weightsFile_coco = "pose/coco/pose_iter_440000.caffemodel"
-                self.net = cv2.dnn.readNetFromCaffe(protoFile_coco, weightsFile_coco)
+                protoFile = "pose/coco/pose_deploy_linevec.prototxt"
+                weightsFile = "pose/coco/pose_iter_440000.caffemodel"
 
-        elif model == "MPI": # requires higher threshold
+        elif model == "MPI" :
+            element_zero = "Head"
             print("Using MPI model")
-            self.BODY_PARTS = { "Head": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
-                        "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
-                        "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "Chest": 14, "Background": 15 }
-
-            self.POSE_PAIRS = [ ["Head", "Neck"], ["Neck", "RShoulder"], ["RShoulder", "RElbow"],
-                                ["RElbow", "RWrist"], ["Neck", "LShoulder"], ["LShoulder", "LElbow"],
-                                ["LElbow", "LWrist"], ["Neck", "Chest"], ["Chest", "RHip"], ["RHip", "RKnee"],
-                                ["RKnee", "RAnkle"], ["Chest", "LHip"], ["LHip", "LKnee"], ["LKnee", "LAnkle"] ]
-
-            protoFile_mpi = "pose/mpi/pose_deploy_linevec_faster_4_stages.prototxt"
-            weightsFile_mpi = "pose/mpi/pose_iter_160000.caffemodel"
-            self.net = cv2.dnn.readNetFromCaffe(protoFile_mpi, weightsFile_mpi)
+            protoFile = "pose/mpi/pose_deploy_linevec_faster_4_stages.prototxt"
+            weightsFile = "pose/mpi/pose_iter_160000.caffemodel"
         
-        else:
+        else :
             print("The model does not exist. Possible models: COCO, MPI, BODY_25")
             exit(0)
+
+        self.BODY_PARTS = { element_zero: 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
+                        "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
+                        "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13 }
+
+        self.POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
+                        ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
+                        ["Neck", "RHip"], ["RHip", "RKnee"], ["RKnee", "RAnkle"], ["Neck", "LHip"],
+                        ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", element_zero] ]
+
+        self.net = cv2.dnn.readNetFromCaffe(protoFile, weightsFile)
 
         if (device == "gpu"):
             self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
@@ -88,7 +80,6 @@ class Skeleton:
         size = (self.frameWidth, self.frameHeight)
 
         self.result = cv2.VideoWriter(self.skeleton_name, cv2.VideoWriter_fourcc('M','J','P','G'), 30, size)
-        self.original = cv2.VideoWriter(self.original_name, cv2.VideoWriter_fourcc('M','J','P','G'), 30, size)
         self.form_analysis = cv2.VideoWriter(self.form_analysis_name, cv2.VideoWriter_fourcc('M','J','P','G'), 30, size)
     
     def pose_estimation(self):
@@ -105,8 +96,6 @@ class Skeleton:
             ret, frame = self.cap.read()
 
             if ret == True:
-                self.original.write(frame)
-
                 self.net.setInput(cv2.dnn.blobFromImage(frame, 1.0 / 255, (368, 368), (0, 0, 0), swapRB=False, crop=False))
                 out = self.net.forward()
                 points = []
@@ -119,7 +108,13 @@ class Skeleton:
 
                 for i in range(size):
                     # Slice heatmap of corresponging body's part.
-                    if self.model == "BODY_25" and (i == 8 or (i > 18 and i < 25)) :
+                    if self.model == "BODY_25" and (i == 8 or (i >= 15 and i <= 25)) :
+                        continue
+
+                    if self.model == "COCO" and (i >= 14 and i <= 18):
+                        continue
+
+                    if self.model == "MPI" and (i == 14 or i == 15) :
                         continue
 
                     heatMap = out[0, i, :, :]
@@ -129,14 +124,15 @@ class Skeleton:
                     y = (self.frameHeight * point[1]) / out.shape[2]
                     points.append((int(x), int(y)) if conf > self.thres else None)
 
-                # Write the points to file for analysis
-                self.file.write(str(points) + '\n')
+                self.form_analysis_matrix.append(points[:4] + points[5:7] + points[8:10] + points[11:13])
 
-                reba_points = points.copy()
-                reba = REBA.REBA(reba_points, self.model)
+                reba = REBA.REBA(points, self.model)
                 reba_calculation = reba.calculate_risk()
                 if reba_calculation != None :
                     cv2.putText(frame, "REBA Score: " + str(reba_calculation[0]), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 0.75, (255,0,0), 2)
+                    reba_calculation = list(reba_calculation)
+                    reba_calculation[1] = (reba_calculation[1].split(".", 1))[0]
+                    reba_calculation = tuple(reba_calculation)
                     self.reba_arr.append(reba_calculation)
                 
                 self.form_analysis.write(frame)
@@ -166,26 +162,37 @@ class Skeleton:
                 key = cv2.waitKey(1)
                 
                 if key == ord('q') or key == 27 or (cv2.getWindowProperty('Display', cv2.WND_PROP_AUTOSIZE) < 0):
-                    avg_fps = total_fps / frame_count
-                    if len(self.reba_arr) > 0 :
-                        max_index = self.reba_arr.index(max(self.reba_arr, key=lambda x:x[0]))
-                        min_index = self.reba_arr.index(min(self.reba_arr, key=lambda x:x[0]))
-                        print("Max REBA score: ", self.reba_arr[max_index][0],  self.reba_arr[max_index][1])
-                        print("Min REBA score: ", self.reba_arr[min_index][0], self.reba_arr[min_index][1])
-                    return [avg_fps, reba_max, reba_avg]
+                    break
             else :
-                avg_fps = total_fps / frame_count
-                if len(self.reba_arr) > 0 :
-                    max_index = self.reba_arr.index(max(self.reba_arr, key=lambda x:x[0]))
-                    min_index = self.reba_arr.index(min(self.reba_arr, key=lambda x:x[0]))
-                    print("Max REBA score: ", self.reba_arr[max_index][0],  self.reba_arr[max_index][1])
-                    print("Min REBA score: ", self.reba_arr[min_index][0], self.reba_arr[min_index][1])
-                return avg_fps
+                break
+
+        avg_fps = total_fps / frame_count
+        if len(self.reba_arr) > 0 :
+            max_index = self.reba_arr.index(max(self.reba_arr, key=lambda x:x[0]))
+            self.reba_max = self.reba_arr[max_index]
+            sum_reba = sum(i for i, j in self.reba_arr)
+            self.reba_avg = round(sum_reba / len(self.reba_arr))
+        return avg_fps
+
+    def get_reba_max(self):
+        return self.reba_max
+    
+    def get_reba_avg(self):
+        if self.reba_avg == 0 or self.reba_avg == 1:
+            return (self.reba_avg, "Negligible Risk")
+        elif self.reba_avg == 2 or self.reba_avg == 3:
+            return (self.reba_avg, "Low Risk")
+        elif self.reba_avg >= 4 and self.reba_avg <= 7:
+            return (self.reba_avg, "Medium Risk")
+        elif self.reba_avg >= 8 and self.reba_avg <= 10:
+            return (self.reba_avg, "High Risk")
+        return (self.reba_avg, "Very High Risk")
+    
+    def get_form_analysis_matrix(self):
+        return self.form_analysis_matrix
         
     def release(self):
         self.cap.release()
         self.result.release()
-        self.original.release()
         self.form_analysis.release()
         cv2.destroyAllWindows() 
-        self.file.close()
