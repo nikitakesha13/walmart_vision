@@ -4,7 +4,8 @@ from PyQt5.QtCore import QDir, Qt, QUrl
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtWidgets import QFileDialog, QPushButton, QHBoxLayout, QVBoxLayout, QSlider, QLabel, QSizePolicy, QStyle
 from PyQt5.QtCore import QTimer
-from skeleton_extraction import Skeleton
+# from skeleton_extraction import Skeleton
+from skeleton import Skeleton
 from datetime import datetime
 from misc import Misc
 from test import Play
@@ -86,9 +87,12 @@ class Ui_MainWindow(object):
             date = currentTime.strftime("%m%d%Y_%H%M%S")
             name = "user_" + date
 
-        self.skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres)
+        self.skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres, self)
         self.skeleton.pose_estimation()
         self.skeleton.release()
+        # arr = [average_fps, reba_max, reba_average]
+        # Reba_Average = arr[2]
+        # Reba_Max = arr[1]
     
     def newRecording(self):
         self.skeletonExtract(0)

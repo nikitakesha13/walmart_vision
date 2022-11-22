@@ -1,33 +1,38 @@
 import cv2
 import time
 import datetime
-
+import REBA
+import os
 
 # select if its front or side 
 class Skeleton:
     def __init__(self, name, source, device, model, thres):
 
-        self.name = "test-video-out/"
-        if name == None:
-            self.name += datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        time_now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        path = "test-video-out/" + name + "_" + time_now + "/"
 
-        else :
-            self.name += name
+        try:
+            os.mkdir(path)
+        except OSError as error:
+            print(error)
             
-        self.name += "_skeleton.avi"
+        self.skeleton_name = path + "skeleton.avi"
+        self.original_name = path + "original.avi"
+        self.form_analysis_name = path + "form_analysis.avi"
 
         self.source = source
         self.device = device
         self.thres = thres
-        self.file = open("points.txt", "w")
+        self.model = model
+        self.reba_arr = []
+        self.file = open(path + "points.txt", "w")
 
-        if model == "BODY_25":
-            print("Using BODY_25 model")
+        if model == "BODY_25" or model == "COCO":
 
             self.BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
-                        "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 9, "RKnee": 10,
-                        "RAnkle": 11, "LHip": 12, "LKnee": 13, "LAnkle": 14, "REye": 15,
-                        "LEye": 16, "REar": 17, "LEar": 18, "Background": 25 }
+                        "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
+                        "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "REye": 14,
+                        "LEye": 15, "REar": 16, "LEar": 17, "Background": 18 }
 
             self.POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
                         ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
@@ -35,26 +40,16 @@ class Skeleton:
                         ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
                         ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"] ]
 
-            # ==================================================================================================
-            # The original BODY_25 points
-            # self.BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
-            #             "LShoulder": 5, "LElbow": 6, "LWrist": 7, "MidHip": 8, "RHip": 9, "RKnee": 10,
-            #             "RAnkle": 11, "LHip": 12, "LKnee": 13, "LAnkle": 14, "REye": 15,
-            #             "LEye": 16, "REar": 17, "LEar": 18, "LBigToe": 19, "LSmallToe": 20, "LHeel": 21, 
-            #             "RBigToe": 22, "RSmallToe": 23, "RHeel": 24, "Background": 25 }
-
-            # self.POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
-            #             ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
-            #             ["Neck", "RHip"], ["RHip", "RKnee"], ["RKnee", "RAnkle"], ["Neck", "LHip"],
-            #             ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
-            #             ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"], ["LAnkle", "LBigToe"],
-            #             ["LAnkle", "LSmallToe"], ["LAnkle", "LHeel"], ["RAnkle", "RBigToe"], ["RAnkle", "RSmallToe"],
-            #             ["RAnkle", "RHeel"] ]
-            # ==================================================================================================
-
-            protoFile_body_25 = "pose/body_25/pose_deploy.prototxt"
-            weightsFile_body_25 = "pose/body_25/pose_iter_584000.caffemodel"
-            self.net = cv2.dnn.readNetFromCaffe(protoFile_body_25, weightsFile_body_25)
+            if model == "BODY_25":
+                print("Using BODY_25 model")
+                protoFile_body_25 = "pose/body_25/pose_deploy.prototxt"
+                weightsFile_body_25 = "pose/body_25/pose_iter_584000.caffemodel"
+                self.net = cv2.dnn.readNetFromCaffe(protoFile_body_25, weightsFile_body_25)
+            else :
+                print("Using COCO model")
+                protoFile_coco = "pose/coco/pose_deploy_linevec.prototxt"
+                weightsFile_coco = "pose/coco/pose_iter_440000.caffemodel"
+                self.net = cv2.dnn.readNetFromCaffe(protoFile_coco, weightsFile_coco)
 
         elif model == "MPI": # requires higher threshold
             print("Using MPI model")
@@ -70,23 +65,6 @@ class Skeleton:
             protoFile_mpi = "pose/mpi/pose_deploy_linevec_faster_4_stages.prototxt"
             weightsFile_mpi = "pose/mpi/pose_iter_160000.caffemodel"
             self.net = cv2.dnn.readNetFromCaffe(protoFile_mpi, weightsFile_mpi)
-
-        elif model == "COCO": # COCO is default model
-            print("Using COCO model")
-            self.BODY_PARTS = { "Nose": 0, "Neck": 1, "RShoulder": 2, "RElbow": 3, "RWrist": 4,
-                        "LShoulder": 5, "LElbow": 6, "LWrist": 7, "RHip": 8, "RKnee": 9,
-                        "RAnkle": 10, "LHip": 11, "LKnee": 12, "LAnkle": 13, "REye": 14,
-                        "LEye": 15, "REar": 16, "LEar": 17, "Background": 18 }
-
-            self.POSE_PAIRS = [ ["Neck", "RShoulder"], ["Neck", "LShoulder"], ["RShoulder", "RElbow"],
-                        ["RElbow", "RWrist"], ["LShoulder", "LElbow"], ["LElbow", "LWrist"],
-                        ["Neck", "RHip"], ["RHip", "RKnee"], ["RKnee", "RAnkle"], ["Neck", "LHip"],
-                        ["LHip", "LKnee"], ["LKnee", "LAnkle"], ["Neck", "Nose"], ["Nose", "REye"],
-                        ["REye", "REar"], ["Nose", "LEye"], ["LEye", "LEar"] ]
-
-            protoFile_coco = "pose/coco/pose_deploy_linevec.prototxt"
-            weightsFile_coco = "pose/coco/pose_iter_440000.caffemodel"
-            self.net = cv2.dnn.readNetFromCaffe(protoFile_coco, weightsFile_coco)
         
         else:
             print("The model does not exist. Possible models: COCO, MPI, BODY_25")
@@ -109,33 +87,41 @@ class Skeleton:
 
         size = (self.frameWidth, self.frameHeight)
 
-        self.result = cv2.VideoWriter(self.name, cv2.VideoWriter_fourcc('M','J','P','G'), 30, size)
+        self.result = cv2.VideoWriter(self.skeleton_name, cv2.VideoWriter_fourcc('M','J','P','G'), 30, size)
+        self.original = cv2.VideoWriter(self.original_name, cv2.VideoWriter_fourcc('M','J','P','G'), 30, size)
+        self.form_analysis = cv2.VideoWriter(self.form_analysis_name, cv2.VideoWriter_fourcc('M','J','P','G'), 30, size)
     
     def pose_estimation(self):
 
         frame_count = 0
         total_fps = 0
-
         print("Skeleton extraction begins...")
 
         cv2.namedWindow("Display", cv2.WINDOW_AUTOSIZE)
         
         while(True):
 
-            # print("Frame {} Processing".format(frame_count))
-
             start_time = time.time()
-            
             ret, frame = self.cap.read()
 
             if ret == True:
+                self.original.write(frame)
 
                 self.net.setInput(cv2.dnn.blobFromImage(frame, 1.0 / 255, (368, 368), (0, 0, 0), swapRB=False, crop=False))
                 out = self.net.forward()
                 points = []
 
-                for i in range(len(self.BODY_PARTS)):
+                size = 26
+                if self.model == "MPI" :
+                    size = 16
+                elif self.model == "COCO" :
+                    size = 19
+
+                for i in range(size):
                     # Slice heatmap of corresponging body's part.
+                    if self.model == "BODY_25" and (i == 8 or (i > 18 and i < 25)) :
+                        continue
+
                     heatMap = out[0, i, :, :]
 
                     _, conf, _, point = cv2.minMaxLoc(heatMap)
@@ -145,6 +131,15 @@ class Skeleton:
 
                 # Write the points to file for analysis
                 self.file.write(str(points) + '\n')
+
+                reba_points = points.copy()
+                reba = REBA.REBA(reba_points, self.model)
+                reba_calculation = reba.calculate_risk()
+                if reba_calculation != None :
+                    cv2.putText(frame, "REBA Score: " + str(reba_calculation[0]), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 0.75, (255,0,0), 2)
+                    self.reba_arr.append(reba_calculation)
+                
+                self.form_analysis.write(frame)
 
                 for pair in self.POSE_PAIRS:
                     partFrom = pair[0]
@@ -159,7 +154,7 @@ class Skeleton:
                         cv2.line(frame, points[idFrom], points[idTo], (0, 255, 0), 3)
                         cv2.ellipse(frame, points[idFrom], (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
                         cv2.ellipse(frame, points[idTo], (3, 3), 0, 0, 360, (0, 0, 255), cv2.FILLED)
-                        cv2.putText(frame, str(partTo), points[idTo], cv2.FONT_HERSHEY_PLAIN, 1.0, (0,0,255), 2)
+                        cv2.putText(frame, str(partFrom), points[idFrom], cv2.FONT_HERSHEY_PLAIN, 1.0, (0,0,255), 2)
 
                 end_time = time.time()
                 fps = 1 / (end_time - start_time)
@@ -167,21 +162,30 @@ class Skeleton:
                 frame_count += 1
 
                 self.result.write(frame)
-
                 cv2.imshow("Display", frame)
-
-                # print("Time to process frame in sec: " + str(end_time - start_time))
                 key = cv2.waitKey(1)
                 
                 if key == ord('q') or key == 27 or (cv2.getWindowProperty('Display', cv2.WND_PROP_AUTOSIZE) < 0):
                     avg_fps = total_fps / frame_count
-                    return avg_fps
+                    if len(self.reba_arr) > 0 :
+                        max_index = self.reba_arr.index(max(self.reba_arr, key=lambda x:x[0]))
+                        min_index = self.reba_arr.index(min(self.reba_arr, key=lambda x:x[0]))
+                        print("Max REBA score: ", self.reba_arr[max_index][0],  self.reba_arr[max_index][1])
+                        print("Min REBA score: ", self.reba_arr[min_index][0], self.reba_arr[min_index][1])
+                    return [avg_fps, reba_max, reba_avg]
             else :
                 avg_fps = total_fps / frame_count
+                if len(self.reba_arr) > 0 :
+                    max_index = self.reba_arr.index(max(self.reba_arr, key=lambda x:x[0]))
+                    min_index = self.reba_arr.index(min(self.reba_arr, key=lambda x:x[0]))
+                    print("Max REBA score: ", self.reba_arr[max_index][0],  self.reba_arr[max_index][1])
+                    print("Min REBA score: ", self.reba_arr[min_index][0], self.reba_arr[min_index][1])
                 return avg_fps
         
     def release(self):
         self.cap.release()
         self.result.release()
+        self.original.release()
+        self.form_analysis.release()
         cv2.destroyAllWindows() 
         self.file.close()
