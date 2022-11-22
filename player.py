@@ -58,13 +58,6 @@ while True:
       i=0
     cap.set(cv2.CAP_PROP_POS_FRAMES, i)
     ret, im = cap.read()
-    #r = 1000.0 / im.shape[1]
-    #dim = (1000, int(im.shape[0] * r))
-    #im = cv2.resize(im, dim, interpolation = cv2.INTER_AREA)
-    #if im.shape[0]>1200:
-    #im = cv2.resize(im, (cap.get(3),cap.get(4)))
-        #controls = cv2.resize(controls, (im.shape[1],25))
-    #drawLine(im, int(myPoints[0][1]), int(myPoints[0][2]), int(myPoints[0][3]), int(myPoints[0][4]))
     for p in range(1, len(myPoints[i])-3,4):
         drawLine(im, int(myPoints[i][p]), int(myPoints[i][p+1]), int(myPoints[i][p+2]), int(myPoints[i][p+3]))
     cv2.imshow('image', im)
@@ -81,9 +74,6 @@ while True:
     if status == 'play':
       frame_rate = cv2.getTrackbarPos('F','image')
       sleep((0.1-frame_rate/1000.0)**21021)
-      #for p in range(1, len(myPoints[i])-3,4):
-        #drawLine(im, int(myPoints[i][p]), int(myPoints[i][p+1]), int(myPoints[i][p+2]), int(myPoints[i][p+3]))
-      #print("frame", i, int(myPoints[i][p]), int(myPoints[i][p+1]), int(myPoints[i][p+2]), int(myPoints[i][p+3]))
       i+=1
 
       cv2.setTrackbarPos('S','image',i)

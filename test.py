@@ -11,18 +11,18 @@ frame_no = 0
 x_coor = 10
 y_coor = 10
 
-class MainWindow(QMainWindow):
-    def __init__(self):
+class Play(QMainWindow):
+    def __init__(self, gui):
         super().__init__()
-        self.initUI()
+        self.initUI(gui)
 
-    def initUI(self):
+    def initUI(self, gui):
         self.statusBar().showMessage("Ready")
-        self.setGeometry(50, 50, 800, 600)
+        self.setGeometry(50, 50, 1200, 1200)
         self.setWindowTitle("Statusbar")
-        self.vidWindow = QLabel(self)
-        self.vidWindow.setGeometry(20, 20, 640, 480)
-        self.maskWindow = QLabel(self)
+        self.vidWindow = QLabel(gui)
+        self.vidWindow.setGeometry(20, 20, 1000, 1000)
+        self.maskWindow = QLabel(gui)
         self.maskWindow.setGeometry(20, 20, 640, 480)
         self.maskWindow.setStyleSheet("background-color: rgba(0,0,0,0%)")
         font = QFont()
@@ -95,5 +95,5 @@ class MainWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    ex = MainWindow()
+    ex = Play()
     sys.exit(app.exec_())
