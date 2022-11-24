@@ -1,12 +1,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from NIOSH_Cal import Calc
 from misc import Misc
 
 #helper functions
 misc = Misc()
 
 class Ui_nioshDialog(object):
-	def __init__(self, _weight, _grip, _freq, _objDist, _hDist, _vDist, _wUnit, _fUnit, _oUnit, _hUnit, _vUnit, _gui):
+	def __init__(self, _weight=0, _grip=0, _freq=0, _objDist=0, _hDist=0, _vDist=0, _wUnit=0, _fUnit=0, _oUnit=0, _hUnit=0, _vUnit=0, _gui=None):
 		self.weight = _weight
 		self.grip = _grip
 		self.freq = _freq
@@ -244,6 +243,34 @@ class Ui_nioshDialog(object):
 		self.vDistUnit.setItemText(1, _translate("nioshDialog", "ft"))
 		self.vDistUnit.setItemText(2, _translate("nioshDialog", "cm"))
 		self.vDistUnit.setItemText(3, _translate("nioshDialog", "m"))
+
+#create a class for the NIOSH equation
+class Calc:
+    def __init__(self, horizontalMulti, verticalMulti, DistMulti, cm, weight):
+        self.horizontialMulti = misc.HMFactor(horizontalMulti)
+        self.verticalMulti = misc.VMFactor(verticalMulti)
+        self.DistMulti = misc.DMFactor(DistMulti)
+        self.cm = misc.couplingMultiplier(cm)
+        self.weight = weight
+
+   #run just a basic calculation for the recommended weight
+    def RecommendWeight (self):
+        #set the defult values since we dont add this to our equation and its mutiplying make it 1
+        asymetricMulti = 1.0
+        freq = 1.0
+        #RWL = LC (51) x HM x VM x DM x AM x FM x CM
+        recWeight = 51.0 * self.horizontialMulti * self.verticalMulti * self.DistMulti * self.cm * freq * asymetricMulti
+        
+        return recWeight
+
+    #run for the  lifting index 
+    def liftingIndex (self):
+        #index is Lifting weight index = weight / RWL
+        if (self.RecommendWeight() > 0):
+            index = float(self.weight) / self.RecommendWeight()
+        else:
+            return -1
+        return index
 
 if __name__ == "__main__":
         import sys

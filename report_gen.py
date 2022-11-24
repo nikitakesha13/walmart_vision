@@ -48,7 +48,6 @@ class Report():
             self.pdf.ln(7)
             i += 1
 
-
     def generate_report(self):
         self.title()
         self.reba()

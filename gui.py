@@ -6,7 +6,6 @@ from PyQt5.QtCore import QTimer
 from skeleton import Skeleton
 from datetime import datetime
 from misc import Misc
-from test import Play
 from PyQt5.QtCore import QTimer, Qt
 from time import sleep
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
@@ -95,7 +94,7 @@ class Ui_MainWindow(object):
         self.skeletonExtract(0)
 
     def openNIOSH(self):
-        from niosh_dialog import Ui_nioshDialog
+        from NIOSH import Ui_nioshDialog
         self.window = QtWidgets.QDialog()
         self.ui = Ui_nioshDialog(self.weight, self.grip, self.freq, self.objDist, self.hDist, self.vDist, self.wu, self.fu, self.ou, self.hu, self.vu, self)
         self.ui.setupUi(self.window)
@@ -117,7 +116,6 @@ class Ui_MainWindow(object):
         self.playButton.setEnabled(True)
         self.layout.addWidget(videoWidget)
         self.videoPlayer.setLayout(self.layout)
-        self.mediaPlayer.play()
     
     def openFile(self):
         fileName, _ = QFileDialog.getOpenFileName(None, "Open Video",
@@ -165,8 +163,8 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         
         self.videoPlayer = QtWidgets.QWidget(self.centralwidget)
+        self.videoPlayer = QtWidgets.QWidget(self.centralwidget)
         self.videoPlayer.setGeometry(QtCore.QRect(340, 40, 931, 421))
-        self.videoPlayer.setStyleSheet("background-color: rgb(44, 44, 44)")
         self.videoPlayer.setObjectName("videoPlayer")
 
         self.playbar = QtWidgets.QWidget(self.centralwidget)
