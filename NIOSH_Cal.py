@@ -24,7 +24,7 @@ class Calc:
         if (self.RecommendWeight() > 0):
             index = float(self.weight) / self.RecommendWeight()
         else:
-            return 1.1
+            return -1
         
         return index
 

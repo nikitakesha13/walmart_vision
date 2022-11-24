@@ -1,11 +1,21 @@
 from re import U
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtCore import Qt, QUrl
+from PyQt5.QtWidgets import QFileDialog, QPushButton, QHBoxLayout, QVBoxLayout, QSlider, QLabel, QSizePolicy, QStyle
 from PyQt5.QtCore import QTimer
-# from skeleton_extraction import Skeleton
 from skeleton import Skeleton
 from datetime import datetime
 from misc import Misc
+from test import Play
+from PyQt5.QtCore import QTimer, Qt
+from time import sleep
+from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
+from PyQt5.QtMultimediaWidgets import QVideoWidget
+
+thickness = 5
+lineColor = (0, 255, 0)
+dotColor = (0, 255, 0)
+radius = 15
 
 class Ui_MainWindow(object):
     def __init__(self):
@@ -74,9 +84,8 @@ class Ui_MainWindow(object):
             date = currentTime.strftime("%m%d%Y_%H%M%S")
             name = "user_" + date
 
-        # self.skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres, self)
-        self.skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres)
-        arr = self.skeleton.pose_estimation()
+        self.skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres, self)
+        self.skeleton.pose_estimation()
         self.skeleton.release()
         # arr = [average_fps, reba_max, reba_average]
         # Reba_Average = arr[2]
@@ -98,6 +107,17 @@ class Ui_MainWindow(object):
         self.ui = Ui_settingsDialog(self.device, self.model, self.thres, self)
         self.ui.setupUi(self.window)
         self.window.show()
+
+    def openPlayer(self):
+        videoWidget = QVideoWidget()
+        self.mediaPlayer.setVideoOutput(videoWidget)
+        self.playButton = QPushButton(self.videoPlayer)
+        self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile("test-video/wyatt.mp4")))
+        self.videoPlayer.setStyleSheet("background-color: rgb(0, 0, 0);")
+        self.playButton.setEnabled(True)
+        self.layout.addWidget(videoWidget)
+        self.videoPlayer.setLayout(self.layout)
+        self.mediaPlayer.play()
     
     def openFile(self):
         fileName, _ = QFileDialog.getOpenFileName(None, "Open Video",
@@ -106,7 +126,29 @@ class Ui_MainWindow(object):
         if fileName != '':
             print(fileName)
             self.skeletonExtract(fileName)
+    
+    def play(self):
+        if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
+            self.mediaPlayer.pause()
+        else:
+            self.mediaPlayer.play()
+    
+    def positionChanged(self, position):
+        self.positionSlider.setValue(position)
 
+    def durationChanged(self, duration):
+        self.positionSlider.setRange(0, duration)
+
+    def setPosition(self, position):
+        self.mediaPlayer.setPosition(position)
+    
+    def mediaStateChanged(self, state):
+        if self.mediaPlayer.state() == QMediaPlayer.PlayingState:
+            self.playButton.setIcon(
+                    self.videoPlayer.style().standardIcon(QStyle.SP_MediaPause))
+        else:
+            self.playButton.setIcon(
+                    self.videoPlayer.style().standardIcon(QStyle.SP_MediaPlay))
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -123,13 +165,40 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         
         self.videoPlayer = QtWidgets.QWidget(self.centralwidget)
-        self.videoPlayer.setGeometry(QtCore.QRect(340, 40, 931, 461))
+        self.videoPlayer.setGeometry(QtCore.QRect(340, 40, 931, 421))
         self.videoPlayer.setStyleSheet("background-color: rgb(44, 44, 44)")
         self.videoPlayer.setObjectName("videoPlayer")
 
-        self.videoView = QtWidgets.QLabel(self.videoPlayer)
-        self.videoView.setGeometry(QtCore.QRect(160, 0, 615, 461))
-        self.videoView.setObjectName("videoView")
+        self.playbar = QtWidgets.QWidget(self.centralwidget)
+        self.playbar.setGeometry(QtCore.QRect(340, 470, 931, 31))
+        self.playbar.setStyleSheet("background-color: rgb(54, 54, 54)")
+        self.playbar.setObjectName("playbar")
+
+        self.mediaPlayer = QMediaPlayer(self.videoPlayer, QMediaPlayer.VideoSurface)
+        self.mediaPlayer.stateChanged.connect(self.mediaStateChanged)
+        self.mediaPlayer.positionChanged.connect(self.positionChanged)
+        self.mediaPlayer.durationChanged.connect(self.durationChanged)
+
+        self.playButton = QPushButton(self.playbar)
+        self.playButton.setEnabled(False)
+        self.playButton.setIcon(self.videoPlayer.style().standardIcon(QStyle.SP_MediaPlay))
+        self.playButton.clicked.connect(self.play)
+        self.playButton.setEnabled(True)
+
+        self.positionSlider = QSlider(Qt.Horizontal, self.playbar)
+        self.positionSlider.setGeometry(QtCore.QRect(50, 0, 861, 22))
+        self.positionSlider.setRange(0, 0)
+        self.positionSlider.sliderMoved.connect(self.setPosition)
+
+        self.errorLabel = QLabel()
+        self.errorLabel.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Maximum)
+
+        controlLayout = QHBoxLayout()
+        controlLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.layout = QVBoxLayout()
+        self.layout.addLayout(controlLayout)
+        self.videoPlayer.setLayout(self.layout)
         
         self.summaryBox = QtWidgets.QGroupBox(self.centralwidget)
         self.summaryBox.setGeometry(QtCore.QRect(950, 520, 321, 121))
@@ -241,7 +310,7 @@ class Ui_MainWindow(object):
         self.actionSettings.setIcon(icon3)
         self.actionSettings.setObjectName("actionSettings")
         
-        self.actionInfo = QtWidgets.QAction(MainWindow)
+        self.actionInfo = QtWidgets.QAction(MainWindow, triggered = lambda: self.openPlayer())
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap("icon/information (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionInfo.setIcon(icon4)

@@ -110,6 +110,8 @@ class Ui_MainWindow(object):
             print(fileName)
             self.skeletonExtract(fileName)
 
+    def stopRecording(self):
+        self.skeleton = None
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -244,7 +246,7 @@ class Ui_MainWindow(object):
         self.actionSettings.setIcon(icon3)
         self.actionSettings.setObjectName("actionSettings")
         
-        self.actionInfo = QtWidgets.QAction(MainWindow)
+        self.actionInfo = QtWidgets.QAction(MainWindow, triggered = lambda:self.newRecording())
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap("icon/information (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionInfo.setIcon(icon4)
