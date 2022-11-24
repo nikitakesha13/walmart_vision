@@ -99,6 +99,8 @@ class Skeleton:
             self.net.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
             self.net.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA)
         
+        print("Using: " + self.device)
+        
         self.cap = cv2.VideoCapture(source)
 
         if (self.cap.isOpened() == False):
