@@ -2,6 +2,7 @@ import cv2
 import time
 import datetime
 import REBA
+from misc import *
 import os
 
 # select if its front or side 
@@ -9,8 +10,7 @@ class Skeleton:
     def __init__(self, name, source, device, model, thres):
 
         print("Using " + device)
-        time_now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        self.path = "test-video-out/" + name + "_" + time_now + "/"
+        self.path = "test-video-out/" + name + "_" + today('hyphen') + "/"
 
         try:
             os.mkdir(self.path)

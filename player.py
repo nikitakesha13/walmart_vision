@@ -1,5 +1,4 @@
 import cv2
-from form_analysis import Analysis
 from misc import *
 from report_gen import Report
 
@@ -24,7 +23,7 @@ class DrawVideo:
     def drawLine(self,image, x1, y1, x2, y2):
         thickness = 3
         lineColor = (0, 255, 0)
-        dotColor = (255, 0, 0)
+        dotColor = (0, 0, 255)
         radius = 8
 
         cv2.line(image, (x1,y1), (x2,y2), lineColor, thickness)

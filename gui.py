@@ -6,7 +6,7 @@ from PyQt5.QtCore import QTimer
 from skeleton import Skeleton
 from misc import *
 from player import DrawVideo
-from form_analysis import Analysis
+from form_analysis import *
 from report_gen import Report
 from PyQt5.QtCore import QTimer, Qt
 from time import sleep
@@ -70,24 +70,25 @@ class Ui_MainWindow(object):
         self.vu = u
 
     def accept(self):
-        self.nameLabel.setText((self.nameInput.toPlainText()).upper())
+        currentName = self.nameInput.toPlainText()
+        if currentName != "":
+            self.nameLabel.setText((currentName).upper())
     
     def skeletonExtract(self, source):
         name = self.nameLabel.text()
         if (name == "-"):
-            name = "anon"
+            name = "user"
 
         self.skeleton = Skeleton(cleanName(name), source, self.device, self.model, self.thres)
         self.arr = self.skeleton.pose_estimation()
         self.skeleton.release()
         # arr = [average_fps, reba_max, reba_average, path]
         
-        exp = Analysis()
-        matrix = exp.analysis(create_dicts(self.skeleton.get_form_analysis_matrix()))
-        print(matrix)
+        matrix = analysis(create_dicts(self.skeleton.get_form_analysis_matrix()))
         exp = DrawVideo(self.arr[3],matrix)
         err = exp.export()
-        report = Report(self.arr[3], cleanName(name.upper()), "11/15/2022", self.arr[2], self.arr[1], err)
+
+        report = Report(self.arr[3], cleanName(name.capitalize()), today('slash'), self.arr[2], self.arr[1], err)
         report.generate_report()
         self.openPlayer(self.arr[3])
     

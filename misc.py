@@ -1,5 +1,6 @@
 #Collection of helper functions that may be used many times
 import math
+import datetime
 
 #---------------------------------------------------------------
 #   GENERAL HELPERS
@@ -15,13 +16,19 @@ def convertToInch(len, unit):
     if (unit == "ft"):
         return len * 12
     if (unit == "m"):
-        return self.convertToInch(len * 100.0, "cm")
+        return convertToInch(len * 100.0, "cm")
     return len
     
 #strip leading and trailing zeroes
 #convert spaces between into underscores
 def cleanName(name):
     return ((name.strip()).replace(" ", "_")).lower()
+
+def today(format):
+    if format == 'hyphen':
+        return datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    elif format == 'slash':
+        return datetime.datetime.now().strftime('%m/%d/%Y')
 
 
 #---------------------------------------------------------------

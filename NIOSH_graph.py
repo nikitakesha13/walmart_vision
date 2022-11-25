@@ -1,5 +1,5 @@
 import sys
-import NIOSH_Cal as nc
+import NIOSH as nc
 from matplotlib.figure import Figure
 import matplotlib as mpl
 import matplotlib.pyplot as plt
