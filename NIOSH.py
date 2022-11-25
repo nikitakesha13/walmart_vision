@@ -271,12 +271,3 @@ class Calc:
         else:
             return -1
         return index
-
-if __name__ == "__main__":
-        import sys
-        app = QtWidgets.QApplication(sys.argv)
-        nioshDialog = QtWidgets.QDialog()
-        ui = Ui_nioshDialog()
-        ui.setupUi(nioshDialog)
-        nioshDialog.show()
-        sys.exit(app.exec_())

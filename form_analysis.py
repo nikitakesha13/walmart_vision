@@ -174,10 +174,6 @@ input = [[(584, 31), (640, 78), (640, 78), None, (667, 78), (667, 172), (612, 28
 obj = Analysis()
 matrix = obj.analysis(misc.create_dicts(input))
 for arr in matrix:
-    f = 0
-    for row in arr:
-        if (len(row) != 0):
-            for i in range(len(row) - 1):
-                print ("P1: ", row[i][0], "-", row[i][1])
-                print ("P2: ", row[i+1][0], "-", row[i+1][1])
-        f+=1
+    for i in range(len(arr[32]) - 1):
+        print ("P1: ", arr[32][i][0], "-", arr[32][i][1])
+        print ("P2: ", arr[32][i+1][0], "-", arr[32][i+1][1])

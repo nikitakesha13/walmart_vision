@@ -127,13 +127,3 @@ class Ui_settingsDialog(object):
 		self.label.setText(_translate("settingsDialog", "Threshold"))
 		self.applyBttn.setText(_translate("settingsDialog", "Apply"))
 		self.restoreBttn.setText(_translate("settingsDialog", "Reset"))
-
-
-if __name__ == "__main__":
-	import sys
-	app = QtWidgets.QApplication(sys.argv)
-	settingsDialog = QtWidgets.QDialog()
-	ui = Ui_settingsDialog()
-	ui.setupUi(settingsDialog)
-	settingsDialog.show()
-	sys.exit(app.exec_())

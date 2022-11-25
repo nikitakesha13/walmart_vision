@@ -11,7 +11,7 @@ class Report():
         self.reba_avg = reba_avg
         self.reba_max = reba_max
         self.arr = arr
-        self.cap = cv2.VideoCapture(self.path + "form_analysis.avi")
+        self.cap = cv2.VideoCapture(self.path + "wyatt.mp4")
         self.pdf = FPDF()
         self.pdf.add_page()
 
