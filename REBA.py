@@ -11,11 +11,6 @@ class REBA():
         self.points = (self.points - np.min(self.points)) / (np.max(self.points) - np.min(self.points))
 
     def calculate_risk(self):
-        
-        if self.model == "MPI" :
-            del self.points[14:16]
-        else : # model is either COCO or BODY_25
-            del self.points[14:19]
 
         if not None in self.points :
             self.normalize_data()
@@ -31,11 +26,6 @@ class REBA():
             score_b, partial_b = self.rebaScore.compute_score_b()
 
             score_c, caption = self.rebaScore.compute_score_c(score_a, score_b)
-
-            # print(self.points)
-            # print("Score_A: ", score_a, "Partial_A: ", partial_a)
-            # print("Score_B: ", score_b, "Partial_B: ", partial_b)
-            # print("Score_C:", score_c)
 
             return (score_c, caption)
         

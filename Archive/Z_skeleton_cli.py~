@@ -20,6 +20,8 @@ def main():
     skeleton = Skeleton(args.name, args.source, args.device, args.model, args.thres)
     avg_fps = skeleton.pose_estimation()
     skeleton.release()
+    print("REBA MAX score: " + str(skeleton.get_reba_max()))
+    print("REBA average score: " + str(skeleton.get_reba_avg()))
 
     print(f"Average FPS: {avg_fps:.3f}")
     

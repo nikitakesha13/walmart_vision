@@ -33,8 +33,8 @@ class Report():
     def reba(self):
         self.pdf.set_xy(10, 40)
         self.pdf.set_font("helvetica", 'BI', size = 12)
-        self.pdf.cell(200, 7, txt="REBA Average Score: " + str(self.reba_avg), new_x="LMARGIN", new_y="NEXT", align='L')
-        self.pdf.cell(200, 7, txt="REBA Max Score: " + str(self.reba_max), new_x="LMARGIN", new_y="NEXT", align='L')
+        self.pdf.cell(200, 7, txt="REBA Average Score: " + str(self.reba_avg[0]) + " (" + str(self.reba_avg[1]) + ")", new_x="LMARGIN", new_y="NEXT", align='L')
+        self.pdf.cell(200, 7, txt="REBA Max Score: " + str(self.reba_max[0])+ " (" + str(self.reba_max[1]) + ")", new_x="LMARGIN", new_y="NEXT", align='L')
 
     def body(self):
         self.pdf.set_font("helvetica", 'BIU', size = 12)
@@ -60,5 +60,5 @@ if __name__ == '__main__':
     arr = []
     for i in range(10):
         arr.append((msg, frame_num))
-    report = Report('test-video-out/out_2022-11-16_20-17-12/', "Nikita Udodenko", "11/15/2022", 7, 10, arr)
+    report = Report('test-video-out/out_2022-11-16_20-17-12/', "Nikita Udodenko", "11/15/2022", (7, 'medium risk'), (10, 'high risk'), arr)
     report.generate_report()
