@@ -4,22 +4,18 @@ from PyQt5.QtCore import Qt, QUrl
 from PyQt5.QtWidgets import QFileDialog, QPushButton, QHBoxLayout, QVBoxLayout, QSlider, QLabel, QSizePolicy, QStyle
 from PyQt5.QtCore import QTimer
 from skeleton import Skeleton
-from datetime import datetime
-from misc import Misc
+from misc import *
+from player import DrawVideo
+from form_analysis import Analysis
+from report_gen import Report
 from PyQt5.QtCore import QTimer, Qt
 from time import sleep
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
-
-thickness = 5
-lineColor = (0, 255, 0)
-dotColor = (0, 255, 0)
-radius = 15
+import time
 
 class Ui_MainWindow(object):
     def __init__(self):
-        self.helper = Misc()
-
         self.device = "cpu"
         self.model = "BODY_25"
         self.thres = 0.1
@@ -79,16 +75,21 @@ class Ui_MainWindow(object):
     def skeletonExtract(self, source):
         name = self.nameLabel.text()
         if (name == "-"):
-            currentTime = datetime.now()
-            date = currentTime.strftime("%m%d%Y_%H%M%S")
-            name = "user_" + date
+            name = "anon"
 
-        self.skeleton = Skeleton(self.helper.cleanName(name), source, self.device, self.model, self.thres, self)
-        self.skeleton.pose_estimation()
+        self.skeleton = Skeleton(cleanName(name), source, self.device, self.model, self.thres)
+        self.arr = self.skeleton.pose_estimation()
         self.skeleton.release()
-        # arr = [average_fps, reba_max, reba_average]
-        # Reba_Average = arr[2]
-        # Reba_Max = arr[1]
+        # arr = [average_fps, reba_max, reba_average, path]
+        
+        exp = Analysis()
+        matrix = exp.analysis(create_dicts(self.skeleton.get_form_analysis_matrix()))
+        print(matrix)
+        exp = DrawVideo(self.arr[3],matrix)
+        err = exp.export()
+        report = Report(self.arr[3], cleanName(name.upper()), "11/15/2022", self.arr[2], self.arr[1], err)
+        report.generate_report()
+        self.openPlayer(self.arr[3])
     
     def newRecording(self):
         self.skeletonExtract(0)
@@ -107,11 +108,11 @@ class Ui_MainWindow(object):
         self.ui.setupUi(self.window)
         self.window.show()
 
-    def openPlayer(self):
+    def openPlayer(self, path):
         videoWidget = QVideoWidget()
         self.mediaPlayer.setVideoOutput(videoWidget)
         self.playButton = QPushButton(self.videoPlayer)
-        self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile("test-video/wyatt.mp4")))
+        self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(path + "result.avi")))
         self.videoPlayer.setStyleSheet("background-color: rgb(0, 0, 0);")
         self.playButton.setEnabled(True)
         self.layout.addWidget(videoWidget)
@@ -308,7 +309,7 @@ class Ui_MainWindow(object):
         self.actionSettings.setIcon(icon3)
         self.actionSettings.setObjectName("actionSettings")
         
-        self.actionInfo = QtWidgets.QAction(MainWindow, triggered = lambda: self.openPlayer())
+        self.actionInfo = QtWidgets.QAction(MainWindow, triggered = lambda: self.openPlayer(""))
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap("icon/information (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionInfo.setIcon(icon4)

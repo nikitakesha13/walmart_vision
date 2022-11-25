@@ -1,9 +1,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
-from misc import Misc
+from misc import *
 
 #helper functions
-misc = Misc()
-
 class Ui_nioshDialog(object):
 	def __init__(self, _weight=0, _grip=0, _freq=0, _objDist=0, _hDist=0, _vDist=0, _wUnit=0, _fUnit=0, _oUnit=0, _hUnit=0, _vUnit=0, _gui=None):
 		self.weight = _weight
@@ -45,7 +43,7 @@ class Ui_nioshDialog(object):
 		self.vUnit = self.vDistUnit.currentText()
 		self.gui.setVDist(self.vDist, self.vUnit)
 
-		self.calcObj = Calc(misc.convertToInch(self.hDist, self.hUnit), misc.convertToInch(self.vDist, self.vUnit), misc.convertToInch(self.objDist, self.objDistUnit), self.grip, misc.convertToLb(self.weight, self.weightUnit))
+		self.calcObj = Calc(convertToInch(self.hDist, self.hUnit), convertToInch(self.vDist, self.vUnit), convertToInch(self.objDist, self.objDistUnit), self.grip, convertToLb(self.weight, self.weightUnit))
 		niosh_in = self.calcObj.liftingIndex()
 
 		if (niosh_in == -1):
@@ -247,10 +245,10 @@ class Ui_nioshDialog(object):
 #create a class for the NIOSH equation
 class Calc:
     def __init__(self, horizontalMulti, verticalMulti, DistMulti, cm, weight):
-        self.horizontialMulti = misc.HMFactor(horizontalMulti)
-        self.verticalMulti = misc.VMFactor(verticalMulti)
-        self.DistMulti = misc.DMFactor(DistMulti)
-        self.cm = misc.couplingMultiplier(cm)
+        self.horizontialMulti = HMFactor(horizontalMulti)
+        self.verticalMulti = VMFactor(verticalMulti)
+        self.DistMulti = DMFactor(DistMulti)
+        self.cm = couplingMultiplier(cm)
         self.weight = weight
 
    #run just a basic calculation for the recommended weight

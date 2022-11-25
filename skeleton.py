@@ -10,15 +10,15 @@ class Skeleton:
 
         print("Using " + device)
         time_now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        path = "test-video-out/" + name + "_" + time_now + "/"
+        self.path = "test-video-out/" + name + "_" + time_now + "/"
 
         try:
-            os.mkdir(path)
+            os.mkdir(self.path)
         except OSError as error:
             print(error)
             
-        self.skeleton_name = path + "skeleton.avi"
-        self.form_analysis_name = path + "form_analysis.avi"
+        self.skeleton_name = self.path + "skeleton.avi"
+        self.form_analysis_name = self.path + "form_analysis.avi"
 
         self.source = source
         self.device = device
@@ -172,7 +172,8 @@ class Skeleton:
             self.reba_max = self.reba_arr[max_index]
             sum_reba = sum(i for i, j in self.reba_arr)
             self.reba_avg = round(sum_reba / len(self.reba_arr))
-        return avg_fps
+        
+        return [avg_fps, self.get_reba_max(), self.get_reba_avg(), self.path]
 
     def get_reba_max(self):
         return self.reba_max
