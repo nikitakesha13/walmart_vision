@@ -23,7 +23,7 @@ class Graph:
                 weight_arr.append(inital_weight)
                 inital_weight += 1
 
-    def create_risk_array(self,good_risk_index_arr, fair_risk_ar, poor_risk_ar,weight_arr):
+    def create_risk_array(self,good_risk_index_arr, fair_risk_ar, poor_risk_ar,y_arr,weight_arr):
         for w in weight_arr:
             good_calc = nc.Calc(self.horizontialMulti,self.verticalMulti,self.DistMulti,"Good", w)
             good_risk = good_calc.liftingIndex()
@@ -34,6 +34,7 @@ class Graph:
             poor_calc = nc.Calc(self.horizontialMulti,self.verticalMulti,self.DistMulti,"Poor", w)
             poor_risk = poor_calc.liftingIndex()
             poor_risk_ar.append(poor_risk)
+            y_arr.append(1)
 
 
 def main():
@@ -54,8 +55,9 @@ def main():
     good_risk_ar = []
     fair_risk_ar = []
     poor_risk_ar = []
+    y_arr = []
     #take in three arrays and output for the graphs y's based om weight
-    graph.create_risk_array(good_risk_ar, fair_risk_ar, poor_risk_ar, weight_ar)
+    graph.create_risk_array(good_risk_ar, fair_risk_ar, poor_risk_ar,y_arr, weight_ar)
 
 
 
