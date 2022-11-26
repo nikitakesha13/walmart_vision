@@ -1,6 +1,8 @@
 import sys
 import NIOSH as nc
 from matplotlib.figure import Figure
+from matplotlib.collections import LineCollection
+from matplotlib.colors import ListedColormap, BoundaryNorm
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import random
@@ -34,30 +36,37 @@ class Graph:
             poor_risk_ar.append(poor_risk)
 
 
-#test of the functions 
-hm = input("Please enter the Horizontal Multiplier: ")
-vm = input("Please enter the Vertical Multiplier: ")
-dm = input("Please enter the Distance Multiplier: ")
-cm = input("Please enter the coupling Multiplier: ")
+def main():
+    #test of the functions 
+    hm = input("Please enter the Horizontal Multiplier: ")
+    vm = input("Please enter the Vertical Multiplier: ")
+    dm = input("Please enter the Distance Multiplier: ")
+    cm = input("Please enter the coupling Multiplier: ")
 
-#take in the weight for the lifting index
-weightOfObj = input("Please enter the weight of the object: ")
+    #take in the weight for the lifting index
+    weightOfObj = input("Please enter the weight of the object: ")
 
 
-#initalize graph
-graph = Graph(hm,vm,dm,cm,weightOfObj)
-weight_ar = []
-graph.create_weight_array(weight_ar)
-good_risk_ar = []
-fair_risk_ar = []
-poor_risk_ar = []
-graph.create_risk_array(good_risk_ar, fair_risk_ar, poor_risk_ar, weight_ar)
+    #initalize graph
+    graph = Graph(hm,vm,dm,cm,weightOfObj)
+    weight_ar = []
+    graph.create_weight_array(weight_ar)
+    good_risk_ar = []
+    fair_risk_ar = []
+    poor_risk_ar = []
+    #take in three arrays and output for the graphs y's based om weight
+    graph.create_risk_array(good_risk_ar, fair_risk_ar, poor_risk_ar, weight_ar)
 
-#create a graph
-plt.plot(weight_ar, good_risk_ar, 'g-', label='Good Coupling of Box')
-plt.plot(weight_ar, fair_risk_ar, 'g:', label='Fair Coupling of Box')
-plt.plot(weight_ar, poor_risk_ar, 'g--', label='Poor Coupling of Box')
-plt.xlabel("Weight of Box (lbs)")
-plt.ylabel("Risk Index of NIOSH")
-plt.legend()
-plt.show()
+
+
+    #create a graph
+    plt.plot(weight_ar, good_risk_ar, 'g-', label='Good Coupling of Box')
+    plt.plot(weight_ar, fair_risk_ar, 'g:', label='Fair Coupling of Box')
+    plt.plot(weight_ar, poor_risk_ar, 'g--', label='Poor Coupling of Box')
+    # red line for when risk is above 1
+    plt.axhline(y = 1, color = 'r', linestyle = '-', label = "High Risk") 
+    #x and y lables
+    plt.xlabel("Weight of Box (lbs)")
+    plt.ylabel("Risk Index of NIOSH")
+    plt.legend()
+    plt.show()
