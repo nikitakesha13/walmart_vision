@@ -1,4 +1,5 @@
 from misc import *
+from Archive.test import *
 # All analysis is being done from a side view
 # (0,0) is top left corner
 
@@ -138,10 +139,11 @@ def analysis(frames):
     back_lean_frames = []
     for frame in frames:
         elbow_height_frames.append(check_elbows(frame))
-        back_lean_frames.append(check_lean(frame, 50))
+        back_lean_frames.append(check_lean(frame, 20))
 
     # Multiple frame checks
-    spine_length_frames = check_spine(frames, 20)
-    knees_bent_frames = check_knees(frames, 60)
+    spine_length_frames = check_spine(frames, 10)
+    knees_bent_frames = check_knees(frames, 50)
 
     return [elbow_height_frames, back_lean_frames, spine_length_frames, knees_bent_frames]
+

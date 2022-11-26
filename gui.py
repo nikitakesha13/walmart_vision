@@ -88,8 +88,10 @@ class Ui_MainWindow(object):
         exp = DrawVideo(self.arr[3],matrix)
         err = exp.export()
 
-        report = Report(self.arr[3], cleanName(name.capitalize()), today('slash'), self.arr[2], self.arr[1], err)
+        report = Report(self.arr[3], cleanName(name.capitalize()), today('slash'), self.arr[2], self.arr[1], err[0])
         report.generate_report()
+        self.printMsgLog(err[0])
+        self.printMsgGuide(err[1])
         self.openPlayer(self.arr[3])
     
     def newRecording(self):
@@ -110,13 +112,13 @@ class Ui_MainWindow(object):
         self.window.show()
 
     def openPlayer(self, path):
-        videoWidget = QVideoWidget()
-        self.mediaPlayer.setVideoOutput(videoWidget)
+        self.mediaPlayer.setVideoOutput(self.videoWidget)
         self.playButton = QPushButton(self.videoPlayer)
         self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(path + "result.avi")))
         self.videoPlayer.setStyleSheet("background-color: rgb(0, 0, 0);")
         self.playButton.setEnabled(True)
-        self.layout.addWidget(videoWidget)
+        self.layout.removeWidget(self.videoWidget)
+        self.layout.addWidget(self.videoWidget)
         self.videoPlayer.setLayout(self.layout)
     
     def openFile(self):
@@ -149,6 +151,24 @@ class Ui_MainWindow(object):
         else:
             self.playButton.setIcon(
                     self.videoPlayer.style().standardIcon(QStyle.SP_MediaPlay))
+    
+    def printMsgGuide(self, arr):
+        self.guideLines.clear()
+        self.guideLines.setAlignment(QtCore.Qt.AlignLeft)
+        text = ""
+        for msg in arr:
+            text += msg + "\n"
+        self.guideLines.setText(text)
+
+    def printMsgLog(self, arr):
+        self.msgPrint.clear()
+        self.msgPrint.setAlignment(QtCore.Qt.AlignTop)
+        text = ""
+        for msg in arr:
+            text += "Frame " + str(msg[1]) + ": " + msg[0] + "\n"
+        
+        self.msgPrint.setGeometry(QtCore.QRect(10, 10, 311, 441))
+        self.msgPrint.setText(text)
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -178,6 +198,8 @@ class Ui_MainWindow(object):
         self.mediaPlayer.stateChanged.connect(self.mediaStateChanged)
         self.mediaPlayer.positionChanged.connect(self.positionChanged)
         self.mediaPlayer.durationChanged.connect(self.durationChanged)
+
+        self.videoWidget = QVideoWidget()
 
         self.playButton = QPushButton(self.playbar)
         self.playButton.setEnabled(False)
@@ -246,16 +268,16 @@ class Ui_MainWindow(object):
         self.msgBoard.setGeometry(QtCore.QRect(10, 40, 321, 461))
         self.msgBoard.setStyleSheet("color: rgb(255, 255, 255); background-color: rgb(44, 44, 44);")
         self.msgBoard.setWidgetResizable(True)
+        self.msgBoard.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.msgBoard.setObjectName("msgBoard")
-        
-        self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 329, 459))
-        self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
-        self.msgBoard.setWidget(self.scrollAreaWidgetContents)
 
-        self.msgPrint = QtWidgets.QLabel(self.scrollAreaWidgetContents)
+        self.msgPrint = QtWidgets.QLabel(self.msgBoard)
         self.msgPrint.setGeometry(QtCore.QRect(100, 220, 111, 16))
         self.msgPrint.setObjectName("msgPrint")
+
+        self.guideLines = QtWidgets.QLabel(self.rcmBoard)
+        self.guideLines.setGeometry(QtCore.QRect(10, 20, 911, 91))
+        self.guideLines.setObjectName("guideLines")
         
         self.label_6 = QtWidgets.QLabel(self.centralwidget)
         self.label_6.setGeometry(QtCore.QRect(20, 20, 131, 16))
@@ -310,7 +332,7 @@ class Ui_MainWindow(object):
         self.actionSettings.setIcon(icon3)
         self.actionSettings.setObjectName("actionSettings")
         
-        self.actionInfo = QtWidgets.QAction(MainWindow, triggered = lambda: self.openPlayer(""))
+        self.actionInfo = QtWidgets.QAction(MainWindow)
         icon4 = QtGui.QIcon()
         icon4.addPixmap(QtGui.QPixmap("icon/information (1).png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionInfo.setIcon(icon4)
@@ -340,6 +362,7 @@ class Ui_MainWindow(object):
         self.modelLabel.setText(_translate("MainWindow", "BODY_25"))
         self.rcmBoard.setTitle(_translate("MainWindow", "Recommendations"))
         self.msgPrint.setText(_translate("MainWindow", "There\'s no activity"))
+        self.guideLines.setText(_translate("MainWindow", "(Empty)"))
         self.label_6.setText(_translate("MainWindow", "Warning log"))
         self.nameInput.setPlaceholderText(_translate("MainWindow", "Subject name"))
         self.toolBar.setWindowTitle(_translate("MainWindow", "toolBar"))

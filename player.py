@@ -1,21 +1,31 @@
 import cv2
 from misc import *
-from report_gen import Report
+import os
+from form_analysis import *
 
 msgDesc = ["Elbow", "Back lean", "Back bending", "Knee bending"]
+msgGuide = ["Fix elbow", "Keep back straight, do not lean backwards", "Keep back straight, do not bend down too much", "Remember to bend your knees as you bend down"]
+
 
 class DrawVideo:
     def __init__(self, name, arr):
         self.video = name 
         self.cap = cv2.VideoCapture(self.video + "form_analysis.avi")
+        #self.cap = cv2.VideoCapture("test-video/wyatt.mp4")
         self.tots = self.cap.get(cv2.CAP_PROP_FRAME_COUNT)
         self.myPoints = arr
+
+        try:
+            os.mkdir(self.video + "Captures/")
+        except OSError as error:
+            print()
 
         self.frameWidth = int(self.cap.get(3))
         self.frameHeight = int(self.cap.get(4))
         self.size = (self.frameWidth, self.frameHeight)
 
         self.result = cv2.VideoWriter(self.video + "result.avi", cv2.VideoWriter_fourcc('M','J','P','G'), 30, self.size)
+        #self.result = cv2.VideoWriter("test-video-out/result.avi", cv2.VideoWriter_fourcc('M','J','P','G'), 30, self.size)
 
     def flick():
         pass
@@ -37,17 +47,20 @@ class DrawVideo:
         print("Start exporting...")
         i = 0
         log = []
+        note = ["","","",""]
         while True:
             self.cap.set(cv2.CAP_PROP_POS_FRAMES, i)
             ret, im = self.cap.read()
             f = 0
             for arr in self.myPoints:
-                if (len(arr[i]) != 0):
-                    for j in range(len(arr[i]) - 1):
-                        self.drawLine(im, int(arr[i][j][0]), int(arr[i][j][1]), int(arr[i][j+1][0]), int(arr[i][j+1][1]))
-                    cv2.imwrite(self.video + "Frame_"+str(i)+".jpg",im)
-                    msg = (msgDesc[f], i)
-                    log.append(msg)
+                if arr[i]:
+                    self.drawLine(im, int(arr[i][0][0]), int(arr[i][0][1]), int(arr[i][1][0]), int(arr[i][1][1]))
+                    note[f] = msgGuide[f]
+                    if i-1 >= 0:
+                        if not arr[i-1]:
+                            cv2.imwrite(self.video + "Captures/Frame_"+str(i)+".jpg",im)
+                            msg = (msgDesc[f], i)
+                            log.append(msg)
                 f += 1
             
             frameText = "Frame " + str(i)
@@ -60,4 +73,10 @@ class DrawVideo:
             continue
         print("DONE!")
         self.result.release()
-        return log
+        return [log, note]
+
+""" matrix = analysis(create_dicts(input()))
+obj = DrawVideo("test-video-out/", matrix)
+err = obj.export()
+print (err[1])
+ """

@@ -36,7 +36,7 @@ class Report():
             if self.pdf.will_page_break(57) == True:
                 self.pdf.ln(50)
             self.pdf.cell(200, 7, txt=str(i) + ". " + str(el[0]), new_x="LMARGIN", new_y="NEXT", align='L')
-            self.pdf.image(self.path + "Frame_" + str(el[1]) + ".jpg", x=60, h=50)
+            self.pdf.image(self.path + "Captures/Frame_" + str(el[1]) + ".jpg", x=60, h=50)
             self.pdf.ln(7)
             i += 1
 
