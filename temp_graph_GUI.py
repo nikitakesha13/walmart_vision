@@ -14,11 +14,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(947, 361)
-        Form.setStyleSheet("\n"
-"background-color: rgb(255, 255, 255);")
+        Form.resize(1005, 429)
+        Form.setStyleSheet("background-color: rgb(44, 44, 44);\n"
+"color: #fff;")
         self.groupBox_4 = QtWidgets.QGroupBox(Form)
-        self.groupBox_4.setGeometry(QtCore.QRect(30, 30, 421, 251))
+        self.groupBox_4.setGeometry(QtCore.QRect(30, 30, 421, 341))
         self.groupBox_4.setStyleSheet("")
         self.groupBox_4.setObjectName("groupBox_4")
         self.weightLabel = QtWidgets.QLabel(self.groupBox_4)
@@ -70,12 +70,12 @@ class Ui_Form(object):
         self.weightUnit_5.addItem("")
         self.weightUnit_5.addItem("")
         self.plot = QtWidgets.QPushButton(self.groupBox_4)
-        self.plot.setGeometry(QtCore.QRect(80, 210, 241, 21))
+        self.plot.setGeometry(QtCore.QRect(70, 250, 241, 21))
         self.plot.setStyleSheet("background-color: white;\n"
 "color: black;")
         self.plot.setObjectName("plot")
         self.graphWidget = PlotWidget(Form)
-        self.graphWidget.setGeometry(QtCore.QRect(490, 40, 411, 281))
+        self.graphWidget.setGeometry(QtCore.QRect(490, 40, 481, 331))
         self.graphWidget.setObjectName("graphWidget")
 
         self.retranslateUi(Form)

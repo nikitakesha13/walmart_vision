@@ -24,47 +24,63 @@ class Ui_Form(object):
         self.hUnit = _hUnit
         self.vUnit = _vUnit
         self.gui = _gui
+        self.weight_arr = []
+        self.y_arr = []
+        self.good_risk = []
+        self.fair_risk = []
+        self.poor_risk = []
+        
+
         
     def setGraph(self):
         self.weight = self.weightBox.value()
         self.wUnit = self.weightUnit.currentText()
-        self.gui.setWeight(self.weight, self.wUnit)
+        #self.gui.setWeight(self.weight, self.wUnit)
 
         self.objDist = self.objDistBox.value()
         self.oUnit = self.objUnit.currentText()
-        self.gui.setObjDist(self.objDist, self.oUnit)
+        #self.gui.setObjDist(self.objDist, self.oUnit)
 
         self.hDist = self.hdDistBox.value()
         self.hUnit = self.hdUnit.currentText()
-        self.gui.setHDist(self.hDist, self.hUnit)
+        #self.gui.setHDist(self.hDist, self.hUnit)
 
         self.vDist = self.vdDistBox.value()
-        self.vUnit = self.vdUnit.currentText()
-        self.gui.setVDist(self.vDist, self.vUnit)
+        self.vUnit = self.weightUnit_5.currentText()
+        #self.gui.setVDist(self.vDist, self.vUnit)
 
-        self.graphingObj = NIOSH_graph.Graph(misc.convertToInch(self.hDist, self.hUnit), misc.convertToInch(self.vDist, self.vUnit), misc.convertToInch(self.objDist, self.objDistUnit), "Good", misc.convertToLb(self.weight, self.weightUnit))
+        self.graphingObj = NIOSH_graph.Graph(misc.convertToInch(self.hDist, self.hUnit), misc.convertToInch(self.vDist, self.vUnit), misc.convertToInch(self.objDist, self.oUnit), "Good", misc.convertToLb(self.weight, self.wUnit))
         #create the arrays to plot
-        weight_arr = []
-        y_arr = []
-        good_risk = []
-        fair_risk = []
-        poor_risk = []
+    
 
-        self.graphingObj.create_weight_array(weight_arr)
-        self.graphingObj.create_risk_array(good_risk, fair_risk, poor_risk, y_arr, weight_arr)
+        self.graphingObj.create_weight_array(self.weight_arr)
+        self.graphingObj.create_risk_array(self.good_risk, self.fair_risk, self.poor_risk, self.y_arr, self.weight_arr)
+        #set axis titles
+        self.graphWidget.setLabel('left', "<span style=\"color:white;font-size:15px\">NIOSH Risk Index</span>")
+        self.graphWidget.setLabel('bottom', "<span style=\"color:white;font-size:15px\">Weight of Box (lbs)</span>")
+        #add a legend
+        self.graphWidget.addLegend()
+        #create pens to edit the colors of the graph
+        pen_good = pg.mkPen(color=(0, 255, 0))
+        pen_fair = pg.mkPen(color=(0, 255, 0),style=QtCore.Qt.DashLine)
+        pen_poor = pg.mkPen(color=(0, 255, 0),style=QtCore.Qt.DotLine)
+        pen_high_risk = pg.mkPen(color=(255, 0, 0))
+        #Plot the lines on the graph
+        self.graphWidget.plot(self.weight_arr, self.good_risk, name = "Good Grip", pen = pen_good)
+        self.graphWidget.plot(self.weight_arr, self.fair_risk, name = "Fair Grip", pen = pen_fair)
+        self.graphWidget.plot(self.weight_arr, self.poor_risk, name = "Poor Grip", pen = pen_poor)
+        self.graphWidget.plot(self.weight_arr, self.y_arr, name = "High Risk", pen = pen_high_risk)
+        
 
-        self.plot(weight_arr, good_risk)
 
-    def plot(self, weight, risk):
-        self.graphWidget.plot(weight, risk)
 
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(947, 361)
-        Form.setStyleSheet("\n" "background-color: rgb(255, 255, 255);")
+        Form.resize(1005, 429)
+        Form.setStyleSheet("background-color: rgb(44, 44, 44);\n" "color: #fff;")
         
         self.groupBox_4 = QtWidgets.QGroupBox(Form)
-        self.groupBox_4.setGeometry(QtCore.QRect(30, 30, 421, 251))
+        self.groupBox_4.setGeometry(QtCore.QRect(30, 30, 421, 341))
         self.groupBox_4.setStyleSheet("")
         self.groupBox_4.setObjectName("groupBox_4")
         
@@ -128,13 +144,13 @@ class Ui_Form(object):
         self.weightUnit_5.addItem("")
         self.weightUnit_5.addItem("")
         
-        self.plot = QtWidgets.QPushButton(self.groupBox_4)
-        self.plot.setGeometry(QtCore.QRect(80, 210, 241, 21))
-        self.plot.setStyleSheet("background-color: white;\n" "color: black;")
+        self.plot = QtWidgets.QPushButton(Form, clicked = lambda:self.setGraph())
+        self.plot.setGeometry(QtCore.QRect(70, 250, 241, 21))
+        self.plot.setStyleSheet("background-color: white;\n""color: black;")
         self.plot.setObjectName("plot")
         
         self.graphWidget = PlotWidget(Form)
-        self.graphWidget.setGeometry(QtCore.QRect(490, 40, 411, 281))
+        self.graphWidget.setGeometry(QtCore.QRect(490, 40, 481, 331))
         self.graphWidget.setObjectName("graphWidget")
 
         self.retranslateUi(Form)
@@ -163,7 +179,7 @@ if __name__ == "__main__":
         app = QtWidgets.QApplication(sys.argv)
         form = QtWidgets.QDialog()
         ui = Ui_Form()
-        ui.setupUi(Ui_Form)
+        ui.setupUi(form)
         form.show()
         sys.exit(app.exec_())
 
