@@ -5,6 +5,8 @@ import numpy as np
 
 class Report():
     def __init__(self, path, name, date, reba_avg, reba_max, arr): # arr = [(msg, frame_num)]
+        # print(reba_avg)
+        # print(reba_max)
         self.path = path
         self.name = name
         self.date = date

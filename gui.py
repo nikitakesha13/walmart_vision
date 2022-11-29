@@ -82,6 +82,8 @@ class Ui_MainWindow(object):
         self.skeleton = Skeleton(cleanName(name), source, self.device, self.model, self.thres)
         self.arr = self.skeleton.pose_estimation()
         self.skeleton.release()
+        print(self.arr[2])
+        print(self.arr[1])
         # arr = [average_fps, reba_max, reba_average, path]
         
         matrix = analysis(create_dicts(self.skeleton.get_form_analysis_matrix()))

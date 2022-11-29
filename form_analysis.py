@@ -1,5 +1,5 @@
 from misc import *
-from Archive.test import *
+from Archive import *
 # All analysis is being done from a side view
 # (0,0) is top left corner
 

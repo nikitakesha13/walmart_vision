@@ -127,13 +127,13 @@ class Skeleton:
                 self.form_analysis_matrix.append(points[:4] + points[5:7] + points[8:10] + points[11:13])
 
                 reba = REBA.REBA(points, self.model)
-                reba_calculation = reba.calculate_risk()
+                reba_calculation = (reba.calculate_risk())
                 if reba_calculation != None :
                     cv2.putText(frame, "REBA Score: " + str(reba_calculation[0]), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 0.75, (255,0,0), 2)
-                    reba_calculation = list(reba_calculation)
-                    reba_calculation[1] = (reba_calculation[1].split(".", 1))[0]
-                    reba_calculation = tuple(reba_calculation)
-                    self.reba_arr.append(reba_calculation)
+                    # reba_calculation = list(reba_calculation)
+                    # reba_calculation[1] = (reba_calculation[1].split(".", 1))[0]
+                    # reba_calculation = tuple(reba_calculation)
+                    self.reba_arr.append(int(reba_calculation[0]))
                 
                 self.form_analysis.write(frame)
 
@@ -166,31 +166,39 @@ class Skeleton:
             else :
                 break
 
-        avg_fps = total_fps / frame_count
+        self.average_fps = total_fps / frame_count
         if len(self.reba_arr) > 0 :
-            max_index = self.reba_arr.index(max(self.reba_arr, key=lambda x:x[0]))
-            self.reba_max = self.reba_arr[max_index]
-            sum_reba = sum(i for i, j in self.reba_arr)
+            self.reba_max = max(self.reba_arr)
+            sum_reba = sum(self.reba_arr)
             self.reba_avg = round(sum_reba / len(self.reba_arr))
         
-        return [avg_fps, self.get_reba_max(), self.get_reba_avg(), self.path]
+        return [self.get_average_fps(), self.get_reba_max(), self.get_reba_avg(), self.get_path()]
+
+    def get_reba_msg(self, reba_score):
+        if reba_score == 0 or reba_score == 1:
+            return "Negligible Risk"
+        elif reba_score == 2 or reba_score == 3:
+            return "Low Risk"
+        elif reba_score >= 4 and reba_score <= 7:
+            return "Medium Risk"
+        elif reba_score >= 8 and reba_score <= 10:
+            return "High Risk"
+        return "Very High Risk"
 
     def get_reba_max(self):
-        return self.reba_max
+        return (self.reba_max, self.get_reba_msg(self.reba_max))
     
     def get_reba_avg(self):
-        if self.reba_avg == 0 or self.reba_avg == 1:
-            return (self.reba_avg, "Negligible Risk")
-        elif self.reba_avg == 2 or self.reba_avg == 3:
-            return (self.reba_avg, "Low Risk")
-        elif self.reba_avg >= 4 and self.reba_avg <= 7:
-            return (self.reba_avg, "Medium Risk")
-        elif self.reba_avg >= 8 and self.reba_avg <= 10:
-            return (self.reba_avg, "High Risk")
-        return (self.reba_avg, "Very High Risk")
+        return (self.reba_avg, self.get_reba_msg(self.reba_avg))
     
     def get_form_analysis_matrix(self):
         return self.form_analysis_matrix
+    
+    def get_average_fps(self):
+        return self.average_fps
+    
+    def get_path(self):
+        return self.path
         
     def release(self):
         self.cap.release()
