@@ -13,6 +13,7 @@ from time import sleep
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 import time
+import os
 
 class Ui_MainWindow(object):
     def __init__(self):
@@ -80,21 +81,19 @@ class Ui_MainWindow(object):
             name = "user"
 
         self.skeleton = Skeleton(cleanName(name), source, self.device, self.model, self.thres)
-        self.arr = self.skeleton.pose_estimation()
+        self.skeleton.pose_estimation()
         self.skeleton.release()
-        print(self.arr[2])
-        print(self.arr[1])
-        # arr = [average_fps, reba_max, reba_average, path]
+        print("Average FPS: ", self.skeleton.get_average_fps())
         
         matrix = analysis(create_dicts(self.skeleton.get_form_analysis_matrix()))
-        exp = DrawVideo(self.arr[3],matrix)
+        exp = DrawVideo(self.skeleton.get_path(), matrix)
         err = exp.export()
 
-        report = Report(self.arr[3], cleanName(name.capitalize()), today('slash'), self.arr[2], self.arr[1], err[0])
+        report = Report(self.skeleton.get_path(), cleanName(name.capitalize()), today('slash'), self.skeleton.get_reba_avg(), self.skeleton.get_reba_max(), err[0])
         report.generate_report()
         self.printMsgLog(err[0])
         self.printMsgGuide(err[1])
-        self.openPlayer(self.arr[3])
+        self.openPlayer(self.skeleton.get_path())
     
     def newRecording(self):
         self.skeletonExtract(0)
@@ -116,7 +115,7 @@ class Ui_MainWindow(object):
     def openPlayer(self, path):
         self.mediaPlayer.setVideoOutput(self.videoWidget)
         self.playButton = QPushButton(self.videoPlayer)
-        self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(path + "result.avi")))
+        self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(os.getcwd() + "/" + path + "result.avi")))
         self.videoPlayer.setStyleSheet("background-color: rgb(0, 0, 0);")
         self.playButton.setEnabled(True)
         self.layout.removeWidget(self.videoWidget)

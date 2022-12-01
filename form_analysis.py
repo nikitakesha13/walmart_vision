@@ -51,7 +51,7 @@ def check_lean(frame, tolerance):
     facing = get_direction(frame)
 
     if facing == "R":
-        if frame["Rshoulder"][0] - frame["Rhip"][0] > tolerance:
+        if frame["Rshoulder"][0] - frame["Rhip"][0] < tolerance:
             return [frame["Rshoulder"], frame["Rhip"]]
         else:
             return []
@@ -139,11 +139,11 @@ def analysis(frames):
     back_lean_frames = []
     for frame in frames:
         elbow_height_frames.append(check_elbows(frame))
-        back_lean_frames.append(check_lean(frame, 20))
+        back_lean_frames.append(check_lean(frame, 0))
 
     # Multiple frame checks
-    spine_length_frames = check_spine(frames, 10)
-    knees_bent_frames = check_knees(frames, 50)
+    spine_length_frames = check_spine(frames, 50)
+    knees_bent_frames = check_knees(frames, 75)
 
     return [elbow_height_frames, back_lean_frames, spine_length_frames, knees_bent_frames]
 

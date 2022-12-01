@@ -130,9 +130,6 @@ class Skeleton:
                 reba_calculation = (reba.calculate_risk())
                 if reba_calculation != None :
                     cv2.putText(frame, "REBA Score: " + str(reba_calculation[0]), (10, 30), cv2.FONT_HERSHEY_DUPLEX, 0.75, (255,0,0), 2)
-                    # reba_calculation = list(reba_calculation)
-                    # reba_calculation[1] = (reba_calculation[1].split(".", 1))[0]
-                    # reba_calculation = tuple(reba_calculation)
                     self.reba_arr.append(int(reba_calculation[0]))
                 
                 self.form_analysis.write(frame)
@@ -171,7 +168,7 @@ class Skeleton:
             self.reba_max = max(self.reba_arr)
             sum_reba = sum(self.reba_arr)
             self.reba_avg = round(sum_reba / len(self.reba_arr))
-        
+
         return [self.get_average_fps(), self.get_reba_max(), self.get_reba_avg(), self.get_path()]
 
     def get_reba_msg(self, reba_score):

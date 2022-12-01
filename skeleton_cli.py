@@ -23,7 +23,7 @@ def main():
     print("REBA MAX score: " + str(skeleton.get_reba_max()))
     print("REBA average score: " + str(skeleton.get_reba_avg()))
 
-    print(f"Average FPS: ", skeleton.get_average_fps())
+    print("Average FPS: ", skeleton.get_average_fps())
     
 
 if __name__ == '__main__':

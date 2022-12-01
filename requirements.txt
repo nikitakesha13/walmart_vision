@@ -1,3 +1,6 @@
-opencv_python
-numpy
+ergonomics-metrics
 matplotlib
+fpdf2
+pyqt5==5.12.2
+numpy
+pyqtgraph==0.12.4
