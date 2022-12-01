@@ -11,7 +11,7 @@ class CLI_Player:
         self.lineColor = (0, 255, 0)
         self.dotColor = (0, 255, 0)
         self.radius = 15
-        self.cap = cv2.VideoCapture(self.path + "/form_analysis.avi")
+        self.cap = cv2.VideoCapture(self.path + "/result.avi")
 
     def drawLine(self, image, x1, y1, x2, y2):
         cv2.circle(image, (x1,y1), self.radius, self.dotColor, self.thickness)
