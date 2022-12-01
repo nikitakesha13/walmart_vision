@@ -1,6 +1,9 @@
 *caffemodel
-/test-video-out
 doc_image.sh
 docker_myapp.sh
 graph_opt.pb
 /__pycache__
+*ui
+new_test_3.py
+test.py
+temp_gui.py

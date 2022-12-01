@@ -1,6 +1,15 @@
-1. install python on your Windows computer
+Linux 
 
-2. pip install -r requirements.txt
- 
- If you need to upgrade any package, use command:
- pip install --upgrade PACKAGE_NAME
+1. Install nvidia drivers on the computer
+Check installation by running "nvidia-smi"
+If drivers are not found, then search "additional drivers" and select the best nvidia driver
+Or use commands "sudo ubuntu-drivers devices" and install recommended driver by running "sudo ubuntu-drivers install nvidia-driver-<recommended>"
+2. Install docker engine 
+3. Install nvidia docker 
+4. Follow steps found here. 
+5. Pull the docker image by running "sudo docker pull ..."
+6. Enable clients to connect from any host by running "xhost +"
+7. Run the docker image
+
+
+
