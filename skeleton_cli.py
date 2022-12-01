@@ -1,5 +1,9 @@
 import argparse
 from skeleton import Skeleton
+from player import DrawVideo
+from cli_player import CLI_Player
+from form_analysis import *
+from report_gen import Report
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Skeleton Extraction")
@@ -24,6 +28,16 @@ def main():
     print("REBA average score: " + str(skeleton.get_reba_avg()))
 
     print("Average FPS: ", skeleton.get_average_fps())
+
+    matrix = analysis(create_dicts(skeleton.get_form_analysis_matrix()))
+    exp = DrawVideo(skeleton.get_path(), matrix)
+    err = exp.export()
+
+    report = Report(skeleton.get_path(), cleanName(args.name.capitalize()), today('slash'), skeleton.get_reba_avg(), skeleton.get_reba_max(), err[0])
+    report.generate_report()
+
+    play = CLI_Player(skeleton.get_path())
+    play.cli_play()
     
 
 if __name__ == '__main__':
