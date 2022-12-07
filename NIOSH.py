@@ -280,13 +280,13 @@ class Ui_nioshDialog(object):
         
 		self.hDistUnit.setItemText(0, _translate("nioshDialog", "in"))
 		self.hDistUnit.setItemText(1, _translate("nioshDialog", "ft"))
-		self.hDistUnit.setItemText(0, _translate("nioshDialog", "cm"))
-		self.hDistUnit.setItemText(1, _translate("nioshDialog", "m"))
+		self.hDistUnit.setItemText(2, _translate("nioshDialog", "cm"))
+		self.hDistUnit.setItemText(3, _translate("nioshDialog", "m"))
         
 		self.vDistUnit.setItemText(0, _translate("nioshDialog", "in"))
 		self.vDistUnit.setItemText(1, _translate("nioshDialog", "ft"))
-		self.vDistUnit.setItemText(0, _translate("nioshDialog", "cm"))
-		self.vDistUnit.setItemText(1, _translate("nioshDialog", "m"))
+		self.vDistUnit.setItemText(2, _translate("nioshDialog", "cm"))
+		self.vDistUnit.setItemText(3, _translate("nioshDialog", "m"))
 
 #create a class for the NIOSH equation
 class Calc:
