@@ -95,6 +95,11 @@ class Ui_nioshDialog(object):
 	
 	def clearPlot(self):
 		self.graphwidget.clear()
+		self.weight_arr = []
+		self.good_risk = []
+		self.fair_risk = []
+		self.poor_risk = []
+		self.y_arr = []
 
 	#the basic python file created by the UI design
 	def setupUi(self, nioshDialog):
